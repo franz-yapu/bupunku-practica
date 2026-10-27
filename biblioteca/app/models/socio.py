@@ -9,7 +9,7 @@ class Socio (db.Model):
     prestamos = db.relationship("Prestamo", back_populates="socio", lazy=True)
    
 
-    def __repr__(self):
+    def to_dict(self):
         return {
             "id": self.id,
             "nombre": self.nombre,

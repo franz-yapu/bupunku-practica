@@ -12,7 +12,7 @@ class Libro(db.Model):
 
     autor = db.relationship("Autor", back_populates="libros", lazy=True)
     prestamos = db.relationship("Prestamo", back_populates="libro", lazy=True)
-    def __repr__(self):
+    def to_dict(self):
         return {
             "id": self.id,
             "titulo": self.titulo, 

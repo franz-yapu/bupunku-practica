@@ -17,7 +17,7 @@ class Prestamo(db.Model):
     libro = db.relationship("Libro", back_populates="prestamos", lazy=True)
     socio = db.relationship("Socio", back_populates="prestamos", lazy=True)
 
-    def __repr__(self):
+    def to_dict(self):
         return {
             "id": self.id,
             "libro": self.libro.titulo if self.libro else None,

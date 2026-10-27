@@ -26,7 +26,7 @@ def prestar(libro_id, socio_id):
 
 def devolver(prestamo_id):
     with transaccion():
-        prestamo = prestamos_repo.obtener(prestamo_id, bloquear=True)
+        prestamo = prestamos_repo.obtener(prestamo_id, bloqueo=True)
         if prestamo is None:
             raise NoEncontradoError("Préstamo no encontrado")
         if prestamo.fecha_devolucion is not None:

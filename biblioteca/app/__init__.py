@@ -24,10 +24,7 @@ def create_app( config_class="config.Config"):
     app.register_blueprint(prestamos_bp)
     app.register_blueprint(socios_bp)
 
-    from .autor import Autor
-    from .libro import Libro
-    from .prestamo import Prestamo
-    from .socio import Socio   
+    
     
     registrar_errores(app)
 

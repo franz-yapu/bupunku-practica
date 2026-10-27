@@ -14,10 +14,10 @@ def prestar():
         libro_id=entero(datos, "libro_id"),
         socio_id=entero(datos, "socio_id"),
     )
-    return prestamo.__dict__(), 201
+    return prestamo.to_dict(), 201
 
 
 @bp.post("/<int:prestamo_id>/devolver")
 def devolver(prestamo_id):
     prestamo = prestamos_service.devolver(prestamo_id)
-    return prestamo.__dict__()
+    return prestamo.to_dict()

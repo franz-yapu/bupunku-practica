@@ -7,5 +7,5 @@ class Autor(db.Model):
     pais = db.Column(db.String(50))
     libros = db.relationship("Libro", back_populates="autor", lazy=True)
 
-    def __repr__(self):
+    def to_dict(self):
         return  {"id":self.id,"nombre":self.nombre,  "pais":self.pais}

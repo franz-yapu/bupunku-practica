@@ -11,7 +11,7 @@ bp = Blueprint("autores", __name__, url_prefix="/autores")
 def listar():
     resultado = autores_service.listar(pagina_de_query())
     return {
-        "items": [a.__dict__() for a in resultado.items],
+        "items": [a.to_dict() for a in resultado.items],
         "pagina": resultado.page,
         "paginas": resultado.pages,
         "total": resultado.total,
@@ -25,13 +25,13 @@ def crear():
         nombre=texto(datos, "nombre", 120),
         pais=texto(datos, "pais", 80, obligatorio=False),
     )
-    return autor.__dict__(), 201
+    return autor.to_dict(), 201
 
 
 @bp.get("/<int:autor_id>/libros")
 def libros(autor_id):
     libros = autores_service.libros_de(autor_id)
-    return {"items": [l.__dict__() for l in libros]}
+    return {"items": [l.to_dict() for l in libros]}
 
 
 @bp.delete("/<int:autor_id>")
