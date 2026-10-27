@@ -11,6 +11,7 @@ class Libro(db.Model):
     autor_id = db.Column(db.Integer, db.ForeignKey("autores.id"), nullable=False, index=True)
 
     autor = db.relationship("Autor", back_populates="libros", lazy=True)
+    prestamos = db.relationship("Prestamo", back_populates="libro", lazy=True)
     def __repr__(self):
         return {
             "id": self.id,

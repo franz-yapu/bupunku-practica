@@ -1,7 +1,7 @@
 from werkzeug.exceptions import HTTPException
 
 from .extensions import db
-from .services.excepciones import (ErrorDeNegocion, DataInvalidaError, DataInvalidos, NoEncontradoError, conflictoError, ReglaDeNegocioError)
+from .services.excepciones import (ErrorDeNegocion, DataInvalidaError, DataInvalidos, NoEncontradoError, ConflictoError, ReglaDeNegocioError)
 
 
 
@@ -9,7 +9,7 @@ CODIGO_ERROR = {
     DataInvalidaError: 400,
     DataInvalidos: 400,
     NoEncontradoError: 404,
-    conflictoError: 409,
+    ConflictoError: 409,
     ReglaDeNegocioError: 422,
 }
 

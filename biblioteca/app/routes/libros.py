@@ -16,7 +16,7 @@ def listar():
         if filtro.lower() not in ("true", "false"):
             raise DatosInvalidos("'disponible' debe ser true o false")
         disponible = filtro.lower() == "true"
-    return {"items": [l.to_dict() for l in libros_service.listar(disponible)]}
+    return {"items": [l.__dict__() for l in libros_service.listar(disponible)]}
 
 
 @bp.post("")
@@ -28,7 +28,7 @@ def crear():
         anio=entero(datos, "anio", obligatorio=False),
         disponible=booleano(datos, "disponible", por_defecto=True),
     )
-    return libro.to_dict(), 201
+    return libro.__dict__(), 201
 
 
 @bp.patch("/<int:libro_id>")
@@ -45,4 +45,4 @@ def actualizar(libro_id):
         cambios["autor_id"] = entero(datos, "autor_id")
 
     libro = libros_service.actualizar(libro_id, cambios)
-    return libro.to_dict()
+    return libro.__dict__()

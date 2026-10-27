@@ -3,18 +3,18 @@ from datetime import date
 from app.models import Libro
 from app.repositories import autores_repo, libros_repo
 
-from .excepciones import NoEncontrado, ReglaDeNegocio
+from .excepciones import NoEncontradoError, ReglaDeNegocioError
 from .transaccion import transaccion
 
 
 def _validar_anio(anio):
     if anio is not None and anio > date.today().year:
-        raise ReglaDeNegocio("El año no puede ser futuro")
+        raise ReglaDeNegocioError("El año no puede ser futuro")
 
 
 def _validar_autor(autor_id):
     if autores_repo.obtener(autor_id) is None:
-        raise NoEncontrado("Autor no encontrado")
+        raise NoEncontradoError("Autor no encontrado")
 
 
 def listar(disponible=None):
@@ -33,7 +33,7 @@ def crear(titulo, autor_id, anio=None, disponible=True):
 def actualizar(libro_id, cambios):
     libro = libros_repo.obtener(libro_id)
     if libro is None:
-        raise NoEncontrado("Libro no encontrado")
+        raise NoEncontradoError("Libro no encontrado")
     if "autor_id" in cambios:
         _validar_autor(cambios["autor_id"])
     if "anio" in cambios:

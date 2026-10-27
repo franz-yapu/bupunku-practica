@@ -15,10 +15,10 @@ def crear():
     if "@" not in email:
         raise DatosInvalidos("'email' no es válido")
     socio = socios_service.crear(nombre=texto(datos, "nombre", 120), email=email)
-    return socio.to_dict(), 201
+    return socio.__dict__(), 201
 
 
 @bp.get("/<int:socio_id>/prestamos")
 def prestamos(socio_id):
     activos = socios_service.prestamos_activos(socio_id)
-    return {"items": [p.to_dict() for p in activos]}
+    return {"items": [p.__dict__() for p in activos]}

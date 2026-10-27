@@ -21,7 +21,7 @@ class NoEncontradoError(ErrorDeNegocion):
         super().__init__(mensaje)
         super().__init__(mensaje)
 
-class conflictoError(ErrorDeNegocion):
+class ConflictoError(ErrorDeNegocion):
     """Excepción para datos inválidos"""
     def __init__(self, mensaje):
         super().__init__(mensaje)

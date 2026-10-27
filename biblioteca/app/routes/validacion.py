@@ -3,13 +3,13 @@ Las reglas de NEGOCIO (año futuro, libro prestado...) viven en los servicios.""
 
 from flask import request
 
-from app.services.excepciones import DatosInvalidos
+from app.services.excepciones import DataInvalidos
 
 
 def leer_json():
     datos = request.get_json(silent=True)
     if not isinstance(datos, dict):
-        raise DatosInvalidos("Se esperaba un objeto JSON")
+        raise DataInvalidos("Se esperaba un objeto JSON")
     return datos
 
 
@@ -18,10 +18,10 @@ def texto(datos, campo, max_largo, obligatorio=True):
     if valor is None and not obligatorio:
         return None
     if not isinstance(valor, str) or not valor.strip():
-        raise DatosInvalidos(f"'{campo}' es obligatorio y debe ser texto")
+        raise DataInvalidos(f"'{campo}' es obligatorio y debe ser texto")
     valor = valor.strip()
     if len(valor) > max_largo:
-        raise DatosInvalidos(f"'{campo}' admite como máximo {max_largo} caracteres")
+        raise DataInvalidos(f"'{campo}' admite como máximo {max_largo} caracteres")
     return valor
 
 
@@ -31,19 +31,19 @@ def entero(datos, campo, obligatorio=True):
         return None
     # En Python, True es un int: hay que excluir bool a mano
     if not isinstance(valor, int) or isinstance(valor, bool):
-        raise DatosInvalidos(f"'{campo}' debe ser un número entero")
+        raise DataInvalidos(f"'{campo}' debe ser un número entero")
     return valor
 
 
 def booleano(datos, campo, por_defecto):
     valor = datos.get(campo, por_defecto)
     if not isinstance(valor, bool):
-        raise DatosInvalidos(f"'{campo}' debe ser true o false")
+        raise DataInvalidos(f"'{campo}' debe ser true o false")
     return valor
 
 
 def pagina_de_query():
     pagina = request.args.get("pagina", 1, type=int)
     if pagina < 1:
-        raise DatosInvalidos("'pagina' debe ser 1 o mayor")
+        raise DataInvalidos("'pagina' debe ser 1 o mayor")
     return pagina
