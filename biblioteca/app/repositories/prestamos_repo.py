@@ -7,7 +7,7 @@ def obtener(prestamo_id , bloqueo=False):
     prestamo = db.session.get(Prestamo, prestamo_id , with_for_update=bloqueo)
     return prestamo  
 
-def active_de_socio(socio_id):
+def activos_de_socio(socio_id):
     consulta = select(Prestamo).where(Prestamo.socio_id == socio_id , Prestamo.fecha_devolucion == None)
     return db.session.execute(consulta).scalars().all()
 

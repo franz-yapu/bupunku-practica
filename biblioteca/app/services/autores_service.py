@@ -6,7 +6,7 @@ from .transaccion import transaccion
 
 def listar(pagina=1, por_pagina=10):
     """Lista los autores con paginación."""
-    return autores_repo.listar(pagina, por_pagina)
+    return autores_repo.listar_paginado(pagina, por_pagina)
 
 def crear(nombre, pais=None, ):
     """Crea un nuevo autor."""
@@ -16,7 +16,7 @@ def crear(nombre, pais=None, ):
     return autor
 
 
-def libro_de(autor_id):
+def libros_de(autor_id):
     """Obtiene los libros de un autor específico."""
     if  autores_repo.obtener(autor_id) is None:
      raise NoEncontradoError(f"Autor con id {autor_id} no encontrado")

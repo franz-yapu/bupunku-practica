@@ -2,7 +2,7 @@ from datetime import datetime , timezone
 
 from app.extensions import db   
 
-def  ahoa():
+def  ahora():
     return datetime.now(timezone.utc)   
 
 class Prestamo(db.Model):
@@ -11,11 +11,11 @@ class Prestamo(db.Model):
     
     libro_id = db.Column(db.Integer, db.ForeignKey("libros.id"), nullable=False, index=True)
     socio_id = db.Column(db.Integer, db.ForeignKey("socios.id"), nullable=False, index=True)
-    fecha_prestamo = db.Column(db.DateTime(timezone.utc), nullable=False, default=ahoa)
+    fecha_prestamo = db.Column(db.DateTime(timezone.utc), nullable=False, default=ahora)
     fecha_devolucion = db.Column(db.DateTime(timezone.utc))
 
-    libro = db.relationship("Libro", backref=db.backref("prestamos", lazy=True))
-    socio = db.relationship("Socio", backref=db.backref("prestamos", lazy=True))
+    libro = db.relationship("Libro", back_populates="prestamos", lazy=True)
+    socio = db.relationship("Socio", back_populates="prestamos", lazy=True)
 
     def __repr__(self):
         return {

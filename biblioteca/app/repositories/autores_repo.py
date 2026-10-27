@@ -13,7 +13,7 @@ def obtener(autor_id):
 
 def listar_paginado(paginado, por_pagina):
     consulta = select(Autor).order_by(Autor.id)
-    return db.paginate(consulta, page=paginado, per_page=por_pagina , errror_out=False)
+    return db.paginate(consulta, page=paginado, per_page=por_pagina , error_out=False)
 
 def tiene_libros(autor_id):
     consulta = select(exists().where(Libro.autor_id == autor_id))

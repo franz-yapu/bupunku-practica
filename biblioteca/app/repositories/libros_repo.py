@@ -4,7 +4,7 @@ from app.services.excepciones import NoEncontradoError
 from app.extensions import db
 from app.models import Libro
 
-def obterner(libro_id, bloqueo=False):
+def obtener(libro_id, bloqueo=False):
     libro = db.session.get(Libro, libro_id , with_for_update=bloqueo)
     if not libro:
         raise NoEncontradoError(f"Libro con id {libro_id} no encontrado")

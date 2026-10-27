@@ -11,7 +11,7 @@ def por_email(socio_email):
     consulta = select(Socio).where(Socio.email == socio_email)
     return db.session.execute(consulta).scalars().first()
 
-def aregar(socio):
+def agregar(socio):
     db.session.add(socio)
     db.session.commit()
     return socio

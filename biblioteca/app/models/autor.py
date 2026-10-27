@@ -5,7 +5,7 @@ class Autor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(120), nullable=False)
     pais = db.Column(db.String(50))
-    libros = db.relationship("Libro", backref="autor", lazy=True)
+    libros = db.relationship("Libro", back_populates="autor", lazy=True)
 
     def __repr__(self):
         return  {"id":self.id,"nombre":self.nombre,  "pais":self.pais}
