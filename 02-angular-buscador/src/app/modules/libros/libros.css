@@ -1,0 +1,20 @@
+table thead {
+    color: black;
+    font-weight: bold;
+    background-color:darkgrey;
+    border: 1px solid black;
+}
+
+table tbody {
+    color: green;
+   
+    border: 1px solid black;
+}       
+
+td {
+    padding: 10px;
+
+}
+tr:hover {
+    background-color: lightgray;
+}

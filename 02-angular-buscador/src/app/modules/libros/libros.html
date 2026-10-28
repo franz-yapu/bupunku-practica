@@ -1,0 +1,31 @@
+<div class="container">
+    <div class="row justify-content-center">
+        
+
+    
+  <h1>Libros</h1>
+  <p>Lista de libros obtenidos desde la API de Open Library.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Author</th>
+      <th>First Publish Year</th>
+    </tr>
+  </thead>
+  <tbody>
+    @if (librosData && librosData.docs) {
+    @for (item of librosData.docs; track $index) {
+<tr 
+    >
+      <td>{{ item.title }}</td>
+      <td>{{ item.author_name?.join(        ', ') }}</td>
+      <td>{{ item.first_publish_year }}</td>    
+    </tr>
+    }
+}
+  </tbody>
+</table>
+</div>
+</div>
