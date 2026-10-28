@@ -13,5 +13,4 @@ def activos_de_socio(socio_id):
 
 def agregar(prestamo):
     db.session.add(prestamo)
-    db.session.commit()
     return prestamo
