@@ -18,22 +18,15 @@ export class Libros implements OnInit {
 constructor( ) {}
 
   ngOnInit() {
-    this.getlibros();
-    this.getlibros2();
-  }
-
-  getlibros() {
-    this.service.getLibros().then((data: LibrosResponse) => {
-        this.librosData = data;
-        console.log('Libros data:', data);
-    }).catch((error) => {
-        console.error('Error fetching libros:', error);
-    });
+ /*    this.getlibros(); */
+  
   }
 
 
-  getlibros2() {
-    this.service.getLibros2().subscribe({
+
+
+  /* getlibros() {
+    this.service.getLibros(item: string).subscribe({
         next: (data: LibrosResponse) => {
             this.librosData = data;
             console.log('Libros data (Observable):', data);
@@ -43,7 +36,7 @@ constructor( ) {}
         }
     });
   }
-
+ */
 
 
 

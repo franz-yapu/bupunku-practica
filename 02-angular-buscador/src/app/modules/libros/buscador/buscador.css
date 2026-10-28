@@ -1,0 +1,6 @@
+.buscador { max-width: 640px; margin: 2rem auto; padding: 0 1rem; font-family: system-ui, sans-serif; }
+input { width: 100%; padding: 0.6rem; font-size: 1rem; box-sizing: border-box; }
+.estado { color: #555; }
+.error { color: #b00020; }
+.lista { list-style: none; padding: 0; }
+.lista li { display: grid; gap: 0.2rem; padding: 0.6rem 0; border-bottom: 1px solid #ddd; }

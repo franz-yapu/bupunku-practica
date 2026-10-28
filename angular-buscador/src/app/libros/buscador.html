@@ -1,0 +1,29 @@
+<main class="buscador">
+  <h1>Buscador de libros</h1>
+
+  <input
+    type="search"
+    [formControl]="busqueda"
+    placeholder="Escribe al menos 3 letras"
+    aria-label="Buscar libros"
+  />
+
+  @if (cargando()) {
+    <p class="estado">Buscando…</p>
+  } @else if (error()) {
+    <p class="estado error" role="alert">{{ error() }}</p>
+  } @else if (total() > 0) {
+    <p class="estado">{{ total() }} resultados</p>
+    <ul class="lista">
+      @for (libro of libros(); track libro.id) {
+        <li>
+          <strong>{{ libro.titulo }}</strong>
+          <span>{{ libro.autores.join(', ') || 'Autor desconocido' }}</span>
+          <span>{{ libro.anio ?? 'Sin año' }}</span>
+        </li>
+      }
+    </ul>
+  } @else if (busqueda.value.trim().length >= 3) {
+    <p class="estado">Sin resultados</p>
+  }
+</main>
