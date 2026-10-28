@@ -2203,6 +2203,10 @@ this.biblioteca.prestar(1, 1).subscribe({
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/ini.min.js"></script>
 <script>
+// Quita service workers que hayan quedado de la app que antes ocupaba este subdominio
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(function (rs) { rs.forEach(function (r) { r.unregister(); }); });
+}
 (function () {
   // Resaltado de sintaxis
   if (window.hljs) document.querySelectorAll('pre code').forEach(function (el) { hljs.highlightElement(el); });
