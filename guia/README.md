@@ -3,8 +3,8 @@
 Sitio estático con la guía de `angular-buscador` y `flask-biblioteca`.
 
 - `src/index.html`: la plantilla (texto, estilos y JS). Los marcadores `<!--archivo:RUTA|lenguaje-->` se reemplazan por el código real.
-- `build.py`: genera `public/index.html`. **Correrlo cada vez que cambie la plantilla o el código de los proyectos**, y commitear `public/`.
-- `Dockerfile` + `nginx.conf`: sirven `public/` con nginx.
+- `build.py`: genera `index.html` (el que se publica). **Correrlo cada vez que cambie la plantilla o el código de los proyectos**, y commitear `index.html`.
+- `Dockerfile` + `nginx.conf`: sirven `index.html` con nginx.
 
 ```bash
 python3 guia/build.py

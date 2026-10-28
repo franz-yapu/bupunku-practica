@@ -1,4 +1,4 @@
-"""Genera public/index.html a partir de src/index.html.
+"""Genera index.html a partir de src/index.html.
 
 Cada marcador <!--archivo:RUTA|LENGUAJE--> se reemplaza por el contenido real del archivo
 (relativo a la raíz del repo), escapado y listo para copiar. Así la guía nunca se desfasa del código.
@@ -27,8 +27,7 @@ def bloque(ruta, lenguaje):
 def main():
     plantilla = (GUIA / "src" / "index.html").read_text(encoding="utf-8")
     salida = MARCADOR.sub(lambda m: bloque(m.group(1).strip(), m.group(2)), plantilla)
-    destino = GUIA / "public" / "index.html"
-    destino.parent.mkdir(exist_ok=True)
+    destino = GUIA / "index.html"
     destino.write_text(salida, encoding="utf-8")
     print(f"Listo: {destino.relative_to(REPO)} ({len(MARCADOR.findall(plantilla))} archivos incrustados)")
 
