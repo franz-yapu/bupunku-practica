@@ -1,0 +1,2287 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Angular y Flask — Guía práctica</title>
+<meta name="description" content="Guía práctica en español: un buscador con Angular (signals + RxJS) y una API REST con Flask en 3 capas (PostgreSQL, SQLAlchemy, Alembic, pytest). Conceptos, código para copiar y plantillas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link id="hl-claro" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+<link id="hl-oscuro" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" disabled>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232f5bea'/%3E%3Cpath d='M9 11l-4 5 4 5M23 11l4 5-4 5M18 9l-4 14' stroke='white' stroke-width='2.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+:root {
+  --fondo: #ffffff;
+  --fondo-2: #f6f7f9;
+  --borde: #e3e6eb;
+  --texto: #1d2330;
+  --texto-2: #5b6474;
+  --acento: #2f5bea;
+  --acento-suave: #eaf0ff;
+  --angular: #c3002f;
+  --flask: #1f7a5a;
+  --nota: #fff8e6;
+  --nota-borde: #f0c75e;
+  --ojo: #fdecec;
+  --ojo-borde: #e48a8a;
+  --codigo-fondo: #f6f8fa;
+  --ancho-menu: 280px;
+}
+:root[data-theme="dark"] {
+  --fondo: #11151c;
+  --fondo-2: #171c25;
+  --borde: #2a313d;
+  --texto: #e4e8ef;
+  --texto-2: #9aa4b5;
+  --acento: #7d9bff;
+  --acento-suave: #1d2640;
+  --angular: #ff6b8a;
+  --flask: #4fc99a;
+  --nota: #2a2412;
+  --nota-borde: #8a6d1f;
+  --ojo: #2d1818;
+  --ojo-borde: #8a3a3a;
+  --codigo-fondo: #0d1117;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+body {
+  margin: 0; background: var(--fondo); color: var(--texto);
+  font: 16px/1.7 Inter, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--acento); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Barra superior */
+.barra {
+  position: sticky; top: 0; z-index: 20; height: 56px;
+  display: flex; align-items: center; gap: 12px; padding: 0 16px;
+  background: color-mix(in srgb, var(--fondo) 92%, transparent);
+  backdrop-filter: blur(8px); border-bottom: 1px solid var(--borde);
+}
+.marca { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--texto); }
+.marca:hover { text-decoration: none; }
+.marca svg { width: 26px; height: 26px; }
+.barra .espacio { flex: 1; }
+.barra nav { display: flex; gap: 4px; }
+.barra nav a { padding: 6px 10px; border-radius: 6px; color: var(--texto-2); font-weight: 500; font-size: 15px; }
+.barra nav a:hover { background: var(--fondo-2); color: var(--texto); text-decoration: none; }
+.boton-icono {
+  width: 36px; height: 36px; display: grid; place-items: center; border-radius: 8px;
+  border: 1px solid var(--borde); background: var(--fondo); color: var(--texto); cursor: pointer;
+}
+.boton-icono:hover { background: var(--fondo-2); }
+#abrir-menu { display: none; }
+
+/* Layout */
+.contenedor { display: grid; grid-template-columns: var(--ancho-menu) minmax(0, 1fr); max-width: 1280px; margin: 0 auto; }
+.menu {
+  position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto;
+  padding: 20px 16px 40px; border-right: 1px solid var(--borde); font-size: 14.5px;
+}
+.menu input {
+  width: 100%; padding: 8px 10px; margin-bottom: 14px; border-radius: 8px;
+  border: 1px solid var(--borde); background: var(--fondo-2); color: var(--texto); font: inherit;
+}
+.menu h4 { margin: 18px 0 6px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--texto-2); }
+.menu h4.angular { color: var(--angular); }
+.menu h4.flask { color: var(--flask); }
+.menu ul { list-style: none; margin: 0; padding: 0; }
+.menu li a { display: block; padding: 4px 10px; border-radius: 6px; color: var(--texto-2); border-left: 2px solid transparent; }
+.menu li a:hover { color: var(--texto); background: var(--fondo-2); text-decoration: none; }
+.menu li a.activo { color: var(--acento); background: var(--acento-suave); font-weight: 500; }
+
+main { padding: 32px 48px 96px; min-width: 0; }
+.articulo { max-width: 820px; }
+section { margin-bottom: 56px; }
+h1 { font-size: 2.3rem; line-height: 1.2; margin: 0 0 12px; letter-spacing: -.02em; }
+h2 { font-size: 1.6rem; line-height: 1.3; margin: 0 0 12px; padding-top: 8px; letter-spacing: -.01em; }
+h3 { font-size: 1.2rem; margin: 32px 0 8px; }
+h2 a.ancla, h3 a.ancla { opacity: 0; margin-left: 6px; font-weight: 400; }
+h2:hover a.ancla, h3:hover a.ancla { opacity: .6; }
+.lead { font-size: 1.15rem; color: var(--texto-2); margin-top: 0; }
+.parte {
+  margin: 72px 0 32px; padding: 28px; border-radius: 14px; border: 1px solid var(--borde);
+  background: var(--fondo-2);
+}
+.parte .etiqueta { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.parte.angular .etiqueta { color: var(--angular); }
+.parte.flask .etiqueta { color: var(--flask); }
+.parte h1 { margin-top: 6px; }
+.parte p { margin-bottom: 0; }
+
+/* Código */
+code { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: .88em; }
+:not(pre) > code { background: var(--fondo-2); border: 1px solid var(--borde); padding: 1px 5px; border-radius: 5px; }
+figure.codigo, .bloque { position: relative; margin: 16px 0 20px; border: 1px solid var(--borde); border-radius: 10px; overflow: hidden; background: var(--codigo-fondo); }
+figure.codigo figcaption {
+  padding: 7px 14px; font: 500 13px "JetBrains Mono", monospace; color: var(--texto-2);
+  border-bottom: 1px solid var(--borde); background: var(--fondo-2);
+}
+pre { margin: 0; overflow-x: auto; }
+pre code.hljs, pre code { display: block; padding: 14px 16px; background: transparent !important; font-size: 13.5px; line-height: 1.6; }
+.copiar {
+  position: absolute; top: 6px; right: 6px; padding: 4px 10px; font: 500 12px Inter, sans-serif;
+  border-radius: 6px; border: 1px solid var(--borde); background: var(--fondo); color: var(--texto-2); cursor: pointer;
+}
+.copiar:hover { color: var(--texto); }
+.copiar.ok { color: var(--flask); border-color: var(--flask); }
+
+/* Cajas */
+.nota, .ojo, .idea { padding: 12px 16px; border-radius: 10px; margin: 18px 0; border-left: 4px solid; }
+.nota { background: var(--nota); border-color: var(--nota-borde); }
+.ojo { background: var(--ojo); border-color: var(--ojo-borde); }
+.idea { background: var(--acento-suave); border-color: var(--acento); }
+.nota strong:first-child, .ojo strong:first-child, .idea strong:first-child { display: block; margin-bottom: 2px; }
+.nota p, .ojo p, .idea p { margin: 4px 0; }
+
+table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 15px; display: block; overflow-x: auto; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--borde); vertical-align: top; }
+th { background: var(--fondo-2); font-weight: 600; white-space: nowrap; }
+td code { white-space: nowrap; }
+
+.tarjetas { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 24px 0; }
+.tarjeta { display: block; padding: 18px; border-radius: 12px; border: 1px solid var(--borde); color: var(--texto); }
+.tarjeta:hover { border-color: var(--acento); text-decoration: none; }
+.tarjeta b { display: block; font-size: 1.05rem; margin-bottom: 4px; }
+.tarjeta span { color: var(--texto-2); font-size: 15px; }
+.tarjeta .chip { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 99px; margin-bottom: 10px; }
+.chip.angular { background: color-mix(in srgb, var(--angular) 14%, transparent); color: var(--angular); }
+.chip.flask { background: color-mix(in srgb, var(--flask) 14%, transparent); color: var(--flask); }
+
+ol.pasos { counter-reset: paso; list-style: none; padding-left: 0; }
+ol.pasos > li { counter-increment: paso; position: relative; padding-left: 42px; margin-bottom: 14px; }
+ol.pasos > li::before {
+  content: counter(paso); position: absolute; left: 0; top: 1px; width: 28px; height: 28px; border-radius: 50%;
+  display: grid; place-items: center; font-size: 14px; font-weight: 600; background: var(--acento-suave); color: var(--acento);
+}
+
+.diagrama { margin: 20px 0; padding: 16px; border: 1px solid var(--borde); border-radius: 12px; background: var(--fondo-2); overflow-x: auto; }
+.diagrama svg { display: block; width: 100%; min-width: 560px; height: auto; }
+.diagrama .caja { fill: var(--fondo); stroke: var(--borde); stroke-width: 1.5; }
+.diagrama .caja.a { stroke: var(--angular); }
+.diagrama .caja.f { stroke: var(--flask); }
+.diagrama text { fill: var(--texto); font: 500 14px Inter, sans-serif; }
+.diagrama text.sub { fill: var(--texto-2); font-size: 12px; font-weight: 400; }
+.diagrama .flecha { stroke: var(--texto-2); stroke-width: 1.5; fill: none; marker-end: url(#punta); }
+.diagrama #punta path { fill: var(--texto-2); }
+
+details { border: 1px solid var(--borde); border-radius: 10px; padding: 10px 16px; margin: 12px 0; }
+details summary { cursor: pointer; font-weight: 600; }
+details[open] summary { margin-bottom: 8px; }
+
+footer { border-top: 1px solid var(--borde); margin-top: 64px; padding-top: 20px; color: var(--texto-2); font-size: 14px; }
+.subir { position: fixed; right: 18px; bottom: 18px; opacity: 0; pointer-events: none; transition: opacity .2s; }
+.subir.visible { opacity: 1; pointer-events: auto; }
+
+@media (max-width: 960px) {
+  .contenedor { grid-template-columns: 1fr; }
+  #abrir-menu { display: grid; }
+  .barra nav { display: none; }
+  .menu {
+    position: fixed; top: 56px; left: 0; width: min(86vw, 320px); z-index: 15; background: var(--fondo);
+    transform: translateX(-100%); transition: transform .2s;
+  }
+  .menu.abierto { transform: none; box-shadow: 0 10px 30px rgba(0,0,0,.15); }
+  main { padding: 24px 16px 80px; }
+  h1 { font-size: 1.9rem; }
+  .parte { padding: 20px; }
+}
+</style>
+</head>
+<body>
+
+<header class="barra">
+  <button class="boton-icono" id="abrir-menu" aria-label="Abrir menú">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+  </button>
+  <a class="marca" href="#inicio">
+    <svg viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#2f5bea"/><path d="M9 11l-4 5 4 5M23 11l4 5-4 5M18 9l-4 14" stroke="white" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Angular y Flask
+  </a>
+  <span class="espacio"></span>
+  <nav>
+    <a href="#angular">Angular</a>
+    <a href="#flask">Flask</a>
+    <a href="#unir">Unirlos</a>
+    <a href="#glosario">Glosario</a>
+  </nav>
+  <button class="boton-icono" id="tema" aria-label="Cambiar tema claro u oscuro">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+  </button>
+</header>
+
+<div class="contenedor">
+<aside class="menu" id="menu">
+  <input type="search" id="filtro" placeholder="Buscar en la guía…" aria-label="Buscar en el índice">
+  <h4>Empezar</h4>
+  <ul>
+    <li><a href="#inicio">Qué hay aquí</a></li>
+    <li><a href="#requisitos">Lo que necesitas</a></li>
+  </ul>
+  <h4 class="angular">Angular · Buscador</h4>
+  <ul>
+    <li><a href="#angular">Qué vamos a construir</a></li>
+    <li><a href="#ng-crear">Crear el proyecto</a></li>
+    <li><a href="#ng-estructura">Estructura de carpetas</a></li>
+    <li><a href="#ng-componentes">Componentes standalone</a></li>
+    <li><a href="#ng-signals">Signals</a></li>
+    <li><a href="#ng-di">Servicios e inject()</a></li>
+    <li><a href="#ng-http">HttpClient y Observables</a></li>
+    <li><a href="#ng-modelo">Modelo de la API vs. de la app</a></li>
+    <li><a href="#ng-forms">Formularios reactivos</a></li>
+    <li><a href="#ng-rxjs">La tubería RxJS</a></li>
+    <li><a href="#ng-plantilla">Plantilla: @if y @for</a></li>
+    <li><a href="#ng-codigo">Código completo</a></li>
+    <li><a href="#ng-tests">Tests con Vitest</a></li>
+    <li><a href="#ng-tuyo">Haz el tuyo (plantilla)</a></li>
+    <li><a href="#ng-errores">Errores comunes</a></li>
+  </ul>
+  <h4 class="flask">Flask · Biblioteca</h4>
+  <ul>
+    <li><a href="#flask">Qué vamos a construir</a></li>
+    <li><a href="#fl-instalar">Instalar y arrancar</a></li>
+    <li><a href="#fl-capas">Arquitectura en 3 capas</a></li>
+    <li><a href="#fl-estructura">Estructura de carpetas</a></li>
+    <li><a href="#fl-factory">App factory y config</a></li>
+    <li><a href="#fl-modelos">Modelos SQLAlchemy</a></li>
+    <li><a href="#fl-migraciones">Migraciones con Alembic</a></li>
+    <li><a href="#fl-rutas">Rutas y blueprints</a></li>
+    <li><a href="#fl-validacion">Validar formato vs. negocio</a></li>
+    <li><a href="#fl-servicios">Servicios</a></li>
+    <li><a href="#fl-repos">Repositorios</a></li>
+    <li><a href="#fl-errores">Errores → códigos HTTP</a></li>
+    <li><a href="#fl-transacciones">Transacciones y bloqueos</a></li>
+    <li><a href="#fl-endpoints">Endpoints y curl</a></li>
+    <li><a href="#fl-tests">Tests con pytest</a></li>
+    <li><a href="#fl-tuyo">Agrega tu recurso</a></li>
+    <li><a href="#fl-fallos">Errores comunes</a></li>
+  </ul>
+  <h4>Extra</h4>
+  <ul>
+    <li><a href="#unir">Conectar Angular con Flask</a></li>
+    <li><a href="#glosario">Glosario</a></li>
+  </ul>
+</aside>
+
+<main>
+<div class="articulo">
+
+<!-- ============================== INICIO ============================== -->
+<section id="inicio">
+  <h1>Angular y Flask, paso a paso</h1>
+  <p class="lead">Dos proyectos pequeños pero completos, explicados concepto por concepto: un <b>buscador de libros con Angular</b> y una <b>API de biblioteca con Flask</b>. Todo el código se puede copiar y reutilizar.</p>
+
+  <div class="tarjetas">
+    <a class="tarjeta" href="#angular">
+      <span class="chip angular">Frontend</span>
+      <b>Buscador de libros</b>
+      <span>Angular 22, componentes standalone, signals, formularios reactivos y RxJS contra la API de Open Library.</span>
+    </a>
+    <a class="tarjeta" href="#flask">
+      <span class="chip flask">Backend</span>
+      <b>API de biblioteca</b>
+      <span>Flask 3, PostgreSQL, SQLAlchemy 2, Alembic y pytest. Autores, libros, socios y préstamos en 3 capas.</span>
+    </a>
+  </div>
+
+  <h3>Cómo leer esta guía</h3>
+  <ol class="pasos">
+    <li><b>Primero el concepto, después el código.</b> Cada sección explica una idea en pocas líneas y luego muestra dónde aparece en el proyecto.</li>
+    <li><b>Copia sin miedo.</b> Todos los bloques tienen un botón <i>Copiar</i>. El código de la sección "Código completo" es exactamente el de los proyectos.</li>
+    <li><b>Haz el tuyo.</b> Al final de cada parte hay una plantilla para crear un proyecto parecido (otra API, otra tabla).</li>
+  </ol>
+  <div class="idea"><strong>Consejo para estudiar</strong>Escribe el código a mano la primera vez, aunque lo tengas para copiar. Cuando algo no funcione, compara con el bloque de la guía.</div>
+</section>
+
+<section id="requisitos">
+  <h2>Lo que necesitas<a class="ancla" href="#requisitos">#</a></h2>
+  <table>
+    <tr><th>Herramienta</th><th>Para qué</th><th>Comprobar</th></tr>
+    <tr><td>Node.js 22+</td><td>Ejecutar Angular CLI</td><td><code>node -v</code></td></tr>
+    <tr><td>Angular CLI</td><td>Crear y servir el proyecto Angular</td><td><code>npm i -g @angular/cli</code></td></tr>
+    <tr><td>Python 3.12+</td><td>Ejecutar Flask</td><td><code>python3 --version</code></td></tr>
+    <tr><td>Docker</td><td>Levantar PostgreSQL sin instalarlo</td><td><code>docker -v</code></td></tr>
+    <tr><td>Un editor</td><td>VS Code recomendado</td><td>—</td></tr>
+  </table>
+</section>
+
+<!-- ============================== ANGULAR ============================== -->
+<div class="parte angular" id="angular">
+  <span class="etiqueta">Parte 1 · Angular</span>
+  <h1>Buscador de libros</h1>
+  <p>Una sola pantalla: escribes en un campo y aparecen libros de <a href="https://openlibrary.org" target="_blank" rel="noopener">Open Library</a>. Parece simple, pero resuelve los problemas reales de cualquier buscador: no saturar la API, cancelar búsquedas viejas, mostrar "cargando" y errores.</p>
+</div>
+
+<section>
+  <h3>Qué hace exactamente</h3>
+  <ul>
+    <li>No busca hasta que escribas <b>al menos 3 letras</b>.</li>
+    <li>Espera <b>300 ms</b> después de la última tecla (no hace una petición por cada letra).</li>
+    <li>Si escribes algo nuevo mientras la búsqueda anterior sigue en camino, <b>la cancela</b>.</li>
+    <li>Muestra <i>Buscando…</i>, la cantidad de resultados, "Sin resultados" o un mensaje de error.</li>
+    <li>Si falla la red, el buscador <b>sigue funcionando</b> en la siguiente búsqueda.</li>
+  </ul>
+  <div class="diagrama">
+    <svg viewBox="0 0 760 150" role="img" aria-label="Flujo: el usuario escribe, el componente Buscador filtra con RxJS, el LibrosService llama a la API de Open Library, y los resultados vuelven a signals que pinta la plantilla">
+      <defs><marker id="punta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z"/></marker></defs>
+      <rect class="caja" x="10" y="40" width="140" height="70" rx="10"/><text x="80" y="70" text-anchor="middle">Input</text><text class="sub" x="80" y="90" text-anchor="middle">FormControl</text>
+      <rect class="caja a" x="200" y="40" width="160" height="70" rx="10"/><text x="280" y="70" text-anchor="middle">Buscador</text><text class="sub" x="280" y="90" text-anchor="middle">tubería RxJS</text>
+      <rect class="caja a" x="410" y="40" width="160" height="70" rx="10"/><text x="490" y="70" text-anchor="middle">LibrosService</text><text class="sub" x="490" y="90" text-anchor="middle">HttpClient</text>
+      <rect class="caja" x="620" y="40" width="130" height="70" rx="10"/><text x="685" y="70" text-anchor="middle">Open Library</text><text class="sub" x="685" y="90" text-anchor="middle">search.json</text>
+      <path class="flecha" d="M150 65H198"/><path class="flecha" d="M360 65H408"/><path class="flecha" d="M570 65H618"/>
+      <path class="flecha" d="M620 95 C 560 140, 330 140, 282 112"/><text class="sub" x="450" y="142" text-anchor="middle">Libro[] → signals → plantilla</text>
+    </svg>
+  </div>
+</section>
+
+<section id="ng-crear">
+  <h2>Crear el proyecto<a class="ancla" href="#ng-crear">#</a></h2>
+  <p>Desde cero, con el CLI de Angular. Angular 17+ crea componentes <i>standalone</i> por defecto (sin <code>NgModule</code>).</p>
+  <div class="bloque"><pre><code class="language-bash">npm install -g @angular/cli
+ng new buscador --style=css --ssr=false   # responde "No" a zoneless si pregunta y no lo conoces
+cd buscador
+ng generate service libros/libros          # crea libros.service.ts
+ng generate component libros/buscador      # crea buscador.ts / .html / .css
+ng serve                                   # http://localhost:4200</code></pre></div>
+  <p>Para correr el proyecto ya hecho:</p>
+  <div class="bloque"><pre><code class="language-bash">cd angular-buscador
+npm install
+ng test --watch=false   # 5 tests en verde
+ng serve</code></pre></div>
+</section>
+
+<section id="ng-estructura">
+  <h2>Estructura de carpetas<a class="ancla" href="#ng-estructura">#</a></h2>
+  <div class="bloque"><pre><code class="language-plaintext">src/
+├── main.ts                  ← arranca la app (bootstrapApplication)
+├── index.html               ← la página; contiene &lt;app-root&gt;
+└── app/
+    ├── app.ts               ← componente raíz, solo muestra &lt;app-buscador /&gt;
+    ├── app.config.ts        ← providers globales (HttpClient…)
+    └── libros/              ← una carpeta por "funcionalidad"
+        ├── libro.model.ts   ← interfaces (tipos)
+        ├── libros.service.ts← habla con la API
+        ├── buscador.ts      ← lógica del componente
+        ├── buscador.html    ← plantilla
+        ├── buscador.css     ← estilos solo de este componente
+        └── *.spec.ts        ← tests</code></pre></div>
+  <div class="nota"><strong>Regla práctica</strong>Agrupa por funcionalidad (<code>libros/</code>, <code>usuarios/</code>), no por tipo de archivo (<code>components/</code>, <code>services/</code>). Así todo lo de "libros" está junto.</div>
+</section>
+
+<section id="ng-componentes">
+  <h2>Componentes standalone<a class="ancla" href="#ng-componentes">#</a></h2>
+  <p>Un <b>componente</b> es una pieza de pantalla: una clase TypeScript (lógica) + una plantilla HTML (vista) + CSS. "Standalone" significa que el componente declara él mismo lo que usa en <code>imports</code>, sin módulos.</p>
+  <div class="bloque"><pre><code class="language-typescript">@Component({
+  selector: 'app-buscador',            // cómo se usa en HTML: &lt;app-buscador /&gt;
+  imports: [ReactiveFormsModule],      // lo que la plantilla necesita ([formControl])
+  templateUrl: './buscador.html',
+  styleUrl: './buscador.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class Buscador { /* ... */ }</code></pre></div>
+  <p><b>OnPush</b> le dice a Angular: "vuelve a pintar este componente solo cuando cambie algo que yo uso" (un signal, un input, un evento). Con signals es la opción natural y hace la app más rápida.</p>
+  <p>El componente raíz solo coloca al buscador, y <code>main.ts</code> arranca todo:</p>
+  <div class="bloque"><pre><code class="language-typescript">// main.ts
+bootstrapApplication(App, appConfig).catch((err) =&gt; console.error(err));</code></pre></div>
+</section>
+
+<section id="ng-signals">
+  <h2>Signals: el estado de la pantalla<a class="ancla" href="#ng-signals">#</a></h2>
+  <p>Un <b>signal</b> es una caja con un valor que avisa cuando cambia. La plantilla lo lee llamándolo como función: <code>libros()</code>. Cuando haces <code>.set()</code>, Angular repinta lo que dependa de él.</p>
+  <div class="bloque"><pre><code class="language-typescript">readonly libros = signal&lt;Libro[]&gt;([]);          // estado: lista
+readonly cargando = signal(false);                // estado: ¿esperando respuesta?
+readonly error = signal&lt;string | null&gt;(null);     // estado: mensaje de error
+readonly total = computed(() =&gt; this.libros().length); // derivado: se recalcula solo
+
+this.cargando.set(true);     // escribir
+this.libros();               // leer
+this.total();                // leer un computed (no se puede hacer .set)</code></pre></div>
+  <table>
+    <tr><th>Función</th><th>Qué es</th><th>Cuándo usarla</th></tr>
+    <tr><td><code>signal(v)</code></td><td>Valor que puedes cambiar</td><td>Estado propio: lista, cargando, error, filtros</td></tr>
+    <tr><td><code>computed(fn)</code></td><td>Valor calculado a partir de otros signals</td><td>Totales, listas filtradas, textos derivados</td></tr>
+    <tr><td><code>.set(v)</code> / <code>.update(fn)</code></td><td>Cambiar el valor</td><td><code>contador.update(n =&gt; n + 1)</code></td></tr>
+  </table>
+  <div class="idea"><strong>¿Signals o Observables?</strong>Signals para <b>estado</b> (lo que la pantalla muestra ahora). Observables (RxJS) para <b>eventos en el tiempo</b> (teclas, peticiones HTTP). Este proyecto usa los dos: RxJS procesa lo que escribes y el resultado final se guarda en signals.</div>
+</section>
+
+<section id="ng-di">
+  <h2>Servicios e inyección de dependencias<a class="ancla" href="#ng-di">#</a></h2>
+  <p>Un <b>servicio</b> es una clase para la lógica que no es de pantalla: llamar APIs, guardar datos compartidos. El componente no hace <code>new LibrosService()</code>; se lo pide a Angular con <code>inject()</code>.</p>
+  <div class="bloque"><pre><code class="language-typescript">@Injectable({ providedIn: 'root' })   // una sola instancia para toda la app
+export class LibrosService {
+  private readonly http = inject(HttpClient);
+}
+
+export class Buscador {
+  private readonly librosService = inject(LibrosService);
+}</code></pre></div>
+  <p>¿Por qué no <code>new</code>? Porque en los tests Angular puede darte una versión falsa (por ejemplo un <code>HttpClient</code> de prueba) sin tocar el componente.</p>
+  <p><code>HttpClient</code> solo existe si lo registras una vez en <code>app.config.ts</code>:</p>
+  <div class="bloque"><pre><code class="language-typescript">export const appConfig: ApplicationConfig = {
+  providers: [provideBrowserGlobalErrorListeners(), provideHttpClient()],
+};</code></pre></div>
+</section>
+
+<section id="ng-http">
+  <h2>HttpClient y Observables<a class="ancla" href="#ng-http">#</a></h2>
+  <p><code>http.get()</code> no hace la petición en el momento: devuelve un <b>Observable</b>, una "receta" que se ejecuta cuando alguien se suscribe. Con <code>.pipe()</code> le encadenas transformaciones.</p>
+  <div class="bloque"><pre><code class="language-typescript">buscar(texto: string): Observable&lt;Libro[]&gt; {
+  const params = new HttpParams().set('q', texto).set('limit', 10);
+  // GET https://openlibrary.org/search.json?q=borges&amp;limit=10
+  return this.http.get&lt;RespuestaBusqueda&gt;(this.url, { params }).pipe(
+    map((respuesta) =&gt; respuesta.docs.map(/* convertir cada doc en Libro */)),
+  );
+}</code></pre></div>
+  <div class="nota"><strong>Usa HttpParams</strong>En lugar de armar la URL a mano (<code>'?q=' + texto</code>), <code>HttpParams</code> codifica espacios, tildes y símbolos por ti.</div>
+</section>
+
+<section id="ng-modelo">
+  <h2>Modelo de la API vs. modelo de la app<a class="ancla" href="#ng-modelo">#</a></h2>
+  <p>La API responde con nombres en inglés y campos que pueden faltar. En vez de esparcir <code>doc.author_name?.[0]</code> por toda la app, el servicio <b>traduce</b> la respuesta a un tipo propio, limpio y sin opcionales.</p>
+  <table>
+    <tr><th>La API devuelve (no lo controlas)</th><th>Tu app usa (lo controlas)</th></tr>
+    <tr><td><code>key: string</code></td><td><code>id: string</code></td></tr>
+    <tr><td><code>title: string</code></td><td><code>titulo: string</code></td></tr>
+    <tr><td><code>author_name?: string[]</code></td><td><code>autores: string[]</code> (vacío si no hay)</td></tr>
+    <tr><td><code>first_publish_year?: number</code></td><td><code>anio: number | null</code></td></tr>
+  </table>
+  <div class="bloque"><pre><code class="language-typescript">respuesta.docs.map((doc) =&gt; ({
+  id: doc.key,
+  titulo: doc.title,
+  autores: doc.author_name ?? [],          // ?? = "si es null/undefined usa esto"
+  anio: doc.first_publish_year ?? null,
+}))</code></pre></div>
+  <p>Ventaja: si mañana cambias de API, solo tocas el servicio. El componente y la plantilla no se enteran.</p>
+</section>
+
+<section id="ng-forms">
+  <h2>Formularios reactivos<a class="ancla" href="#ng-forms">#</a></h2>
+  <p>Un <code>FormControl</code> representa un campo. Lo interesante es <code>valueChanges</code>: un Observable que emite cada vez que el usuario escribe. Eso es lo que conectamos a RxJS.</p>
+  <div class="bloque"><pre><code class="language-typescript">readonly busqueda = new FormControl('', { nonNullable: true }); // siempre string, nunca null</code></pre></div>
+  <div class="bloque"><pre><code class="language-html">&lt;input type="search" [formControl]="busqueda" placeholder="Escribe al menos 3 letras" /&gt;</code></pre></div>
+  <p>Para que <code>[formControl]</code> funcione, el componente importa <code>ReactiveFormsModule</code>.</p>
+</section>
+
+<section id="ng-rxjs">
+  <h2>La tubería RxJS, operador por operador<a class="ancla" href="#ng-rxjs">#</a></h2>
+  <p>Esta es la parte central del proyecto. Cada tecla entra por arriba y pasa por estos "filtros" en orden:</p>
+  <div class="bloque"><pre><code class="language-typescript">this.busqueda.valueChanges
+  .pipe(
+    map((texto) =&gt; texto.trim()),          // 1. quita espacios
+    debounceTime(300),                      // 2. espera 300 ms de silencio
+    distinctUntilChanged(),                 // 3. ignora si es igual al anterior
+    filter((texto) =&gt; texto.length &gt;= 3),   // 4. mínimo 3 letras
+    tap(() =&gt; {                             // 5. efecto: mostrar "cargando"
+      this.cargando.set(true);
+      this.error.set(null);
+    }),
+    switchMap((texto) =&gt;                    // 6. pide a la API y CANCELA la anterior
+      this.librosService.buscar(texto).pipe(
+        catchError(() =&gt; {                  // 7. si falla, mensaje y lista vacía
+          this.error.set('No se pudo conectar. Revisa tu conexión e intenta de nuevo.');
+          return of([]);
+        }),
+      ),
+    ),
+    takeUntilDestroyed(),                   // 8. se desuscribe al destruir el componente
+  )
+  .subscribe((libros) =&gt; {
+    this.libros.set(libros);
+    this.cargando.set(false);
+  });</code></pre></div>
+  <table>
+    <tr><th>Operador</th><th>En una frase</th><th>Sin él…</th></tr>
+    <tr><td><code>map</code></td><td>Transforma cada valor</td><td>"  borges " y "borges" serían búsquedas distintas</td></tr>
+    <tr><td><code>debounceTime(300)</code></td><td>Deja pasar el valor solo si hubo 300 ms sin teclas</td><td>"borges" = 6 peticiones</td></tr>
+    <tr><td><code>distinctUntilChanged</code></td><td>Bloquea valores repetidos seguidos</td><td>Borrar y reescribir la misma letra repite la búsqueda</td></tr>
+    <tr><td><code>filter</code></td><td>Deja pasar solo lo que cumple la condición</td><td>Buscarías con 1 letra (miles de resultados)</td></tr>
+    <tr><td><code>tap</code></td><td>Hace algo "al costado" sin cambiar el valor</td><td>No habría estado de carga</td></tr>
+    <tr><td><code>switchMap</code></td><td>Cambia a un nuevo Observable y cancela el anterior</td><td>Una respuesta vieja y lenta podría pisar a la nueva</td></tr>
+    <tr><td><code>catchError</code></td><td>Atrapa el error y devuelve un valor de reemplazo</td><td>Un error mataría la tubería: no volvería a buscar nunca</td></tr>
+    <tr><td><code>takeUntilDestroyed</code></td><td>Corta la suscripción cuando el componente muere</td><td>Fuga de memoria</td></tr>
+  </table>
+  <div class="ojo"><strong>Detalle importante: dónde va catchError</strong>Está <b>dentro</b> del <code>switchMap</code>, en el Observable de la petición. Si lo pones afuera, al primer error la tubería principal se completa y el buscador deja de responder. Dentro, solo "muere" esa petición y la siguiente funciona.</div>
+  <div class="nota"><strong>¿Por qué switchMap y no mergeMap?</strong>
+    <p><code>switchMap</code>: solo importa la última búsqueda (buscadores, autocompletar).</p>
+    <p><code>mergeMap</code>: todas en paralelo (subir varios archivos).</p>
+    <p><code>concatMap</code>: una detrás de otra, en orden (guardar cambios en secuencia).</p>
+    <p><code>exhaustMap</code>: ignora nuevas mientras hay una en curso (botón "Pagar" con doble clic).</p>
+  </div>
+</section>
+
+<section id="ng-plantilla">
+  <h2>Plantilla: @if y @for<a class="ancla" href="#ng-plantilla">#</a></h2>
+  <p>Angular 17+ trae <b>control flow</b> integrado. Reemplaza a <code>*ngIf</code> y <code>*ngFor</code> y no necesita importar nada.</p>
+  <div class="bloque"><pre><code class="language-html">@if (cargando()) {
+  &lt;p&gt;Buscando…&lt;/p&gt;
+} @else if (error()) {
+  &lt;p class="error" role="alert"&gt;{{ error() }}&lt;/p&gt;
+} @else if (total() &gt; 0) {
+  &lt;ul&gt;
+    @for (libro of libros(); track libro.id) {
+      &lt;li&gt;{{ libro.titulo }} — {{ libro.anio ?? 'Sin año' }}&lt;/li&gt;
+    }
+  &lt;/ul&gt;
+}</code></pre></div>
+  <ul>
+    <li><code>track libro.id</code> es obligatorio: le dice a Angular cómo reconocer cada elemento para no recrear toda la lista.</li>
+    <li>El orden de los <code>@if</code> define la prioridad: primero "cargando", luego "error", luego resultados.</li>
+    <li><code>role="alert"</code> hace que los lectores de pantalla anuncien el error.</li>
+  </ul>
+</section>
+
+<section id="ng-codigo">
+  <h2>Código completo<a class="ancla" href="#ng-codigo">#</a></h2>
+  <p>Estos son los archivos reales del proyecto, en el orden en que conviene escribirlos.</p>
+  <h3>1. Los tipos</h3>
+  <figure class="codigo"><figcaption>src/app/libros/libro.model.ts</figcaption><pre><code class="language-typescript">// Lo que DEVUELVE la API (no lo controlamos: nombres en inglés, campos opcionales)
+export interface DocumentoOpenLibrary {
+  key: string;
+  title: string;
+  author_name?: string[];
+  first_publish_year?: number;
+}
+
+export interface RespuestaBusqueda {
+  numFound: number;
+  docs: DocumentoOpenLibrary[];
+}
+
+// Lo que USA nuestra app (lo controlamos: nombres claros, sin opcionales)
+export interface Libro {
+  id: string;
+  titulo: string;
+  autores: string[];
+  anio: number | null;
+}</code></pre></figure>
+  <h3>2. El servicio</h3>
+  <figure class="codigo"><figcaption>src/app/libros/libros.service.ts</figcaption><pre><code class="language-typescript">import { HttpClient, HttpParams } from &#x27;@angular/common/http&#x27;;
+import { Injectable, inject } from &#x27;@angular/core&#x27;;
+import { Observable, map } from &#x27;rxjs&#x27;;
+
+import { Libro, RespuestaBusqueda } from &#x27;./libro.model&#x27;;
+
+@Injectable({ providedIn: &#x27;root&#x27; })
+export class LibrosService {
+  private readonly http = inject(HttpClient);
+  private readonly url = &#x27;https://openlibrary.org/search.json&#x27;;
+
+  buscar(texto: string): Observable&lt;Libro[]&gt; {
+    const params = new HttpParams().set(&#x27;q&#x27;, texto).set(&#x27;limit&#x27;, 10);
+
+    return this.http.get&lt;RespuestaBusqueda&gt;(this.url, { params }).pipe(
+      map((respuesta) =&gt;
+        respuesta.docs.map((doc) =&gt; ({
+          id: doc.key,
+          titulo: doc.title,
+          autores: doc.author_name ?? [],
+          anio: doc.first_publish_year ?? null,
+        })),
+      ),
+    );
+  }
+}</code></pre></figure>
+  <h3>3. El componente</h3>
+  <figure class="codigo"><figcaption>src/app/libros/buscador.ts</figcaption><pre><code class="language-typescript">import { ChangeDetectionStrategy, Component, computed, inject, signal } from &#x27;@angular/core&#x27;;
+import { takeUntilDestroyed } from &#x27;@angular/core/rxjs-interop&#x27;;
+import { FormControl, ReactiveFormsModule } from &#x27;@angular/forms&#x27;;
+import { catchError, debounceTime, distinctUntilChanged, filter, map, of, switchMap, tap } from &#x27;rxjs&#x27;;
+
+import { Libro } from &#x27;./libro.model&#x27;;
+import { LibrosService } from &#x27;./libros.service&#x27;;
+
+@Component({
+  selector: &#x27;app-buscador&#x27;,
+  imports: [ReactiveFormsModule],
+  templateUrl: &#x27;./buscador.html&#x27;,
+  styleUrl: &#x27;./buscador.css&#x27;,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class Buscador {
+  private readonly librosService = inject(LibrosService);
+
+  readonly busqueda = new FormControl(&#x27;&#x27;, { nonNullable: true });
+
+  readonly libros = signal&lt;Libro[]&gt;([]);
+  readonly cargando = signal(false);
+  readonly error = signal&lt;string | null&gt;(null);
+  readonly total = computed(() =&gt; this.libros().length);
+
+  constructor() {
+    this.busqueda.valueChanges
+      .pipe(
+        map((texto) =&gt; texto.trim()),
+        debounceTime(300),
+        distinctUntilChanged(),
+        filter((texto) =&gt; texto.length &gt;= 3),
+        tap(() =&gt; {
+          this.cargando.set(true);
+          this.error.set(null);
+        }),
+        switchMap((texto) =&gt;
+          this.librosService.buscar(texto).pipe(
+            catchError(() =&gt; {
+              this.error.set(&#x27;No se pudo conectar. Revisa tu conexión e intenta de nuevo.&#x27;);
+              return of([]);
+            }),
+          ),
+        ),
+        takeUntilDestroyed(),
+      )
+      .subscribe((libros) =&gt; {
+        this.libros.set(libros);
+        this.cargando.set(false);
+      });
+  }
+}</code></pre></figure>
+  <figure class="codigo"><figcaption>src/app/libros/buscador.html</figcaption><pre><code class="language-html">&lt;main class=&quot;buscador&quot;&gt;
+  &lt;h1&gt;Buscador de libros&lt;/h1&gt;
+
+  &lt;input
+    type=&quot;search&quot;
+    [formControl]=&quot;busqueda&quot;
+    placeholder=&quot;Escribe al menos 3 letras&quot;
+    aria-label=&quot;Buscar libros&quot;
+  /&gt;
+
+  @if (cargando()) {
+    &lt;p class=&quot;estado&quot;&gt;Buscando…&lt;/p&gt;
+  } @else if (error()) {
+    &lt;p class=&quot;estado error&quot; role=&quot;alert&quot;&gt;{{ error() }}&lt;/p&gt;
+  } @else if (total() &gt; 0) {
+    &lt;p class=&quot;estado&quot;&gt;{{ total() }} resultados&lt;/p&gt;
+    &lt;ul class=&quot;lista&quot;&gt;
+      @for (libro of libros(); track libro.id) {
+        &lt;li&gt;
+          &lt;strong&gt;{{ libro.titulo }}&lt;/strong&gt;
+          &lt;span&gt;{{ libro.autores.join(&#x27;, &#x27;) || &#x27;Autor desconocido&#x27; }}&lt;/span&gt;
+          &lt;span&gt;{{ libro.anio ?? &#x27;Sin año&#x27; }}&lt;/span&gt;
+        &lt;/li&gt;
+      }
+    &lt;/ul&gt;
+  } @else if (busqueda.value.trim().length &gt;= 3) {
+    &lt;p class=&quot;estado&quot;&gt;Sin resultados&lt;/p&gt;
+  }
+&lt;/main&gt;</code></pre></figure>
+  <figure class="codigo"><figcaption>src/app/libros/buscador.css</figcaption><pre><code class="language-css">.buscador { max-width: 640px; margin: 2rem auto; padding: 0 1rem; font-family: system-ui, sans-serif; }
+input { width: 100%; padding: 0.6rem; font-size: 1rem; box-sizing: border-box; }
+.estado { color: #555; }
+.error { color: #b00020; }
+.lista { list-style: none; padding: 0; }
+.lista li { display: grid; gap: 0.2rem; padding: 0.6rem 0; border-bottom: 1px solid #ddd; }</code></pre></figure>
+  <h3>4. Raíz y configuración</h3>
+  <figure class="codigo"><figcaption>src/app/app.ts</figcaption><pre><code class="language-typescript">import { Component } from &#x27;@angular/core&#x27;;
+import { Buscador } from &#x27;./libros/buscador&#x27;;
+
+@Component({
+  selector: &#x27;app-root&#x27;,
+  imports: [Buscador],
+  template: `&lt;app-buscador /&gt;`,
+})
+export class App {}</code></pre></figure>
+  <figure class="codigo"><figcaption>src/app/app.config.ts</figcaption><pre><code class="language-typescript">import { ApplicationConfig, provideBrowserGlobalErrorListeners } from &#x27;@angular/core&#x27;;
+import { provideHttpClient } from &#x27;@angular/common/http&#x27;;
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    provideHttpClient(),
+  ],
+};</code></pre></figure>
+  <figure class="codigo"><figcaption>src/main.ts</figcaption><pre><code class="language-typescript">import { bootstrapApplication } from &#x27;@angular/platform-browser&#x27;;
+import { appConfig } from &#x27;./app/app.config&#x27;;
+import { App } from &#x27;./app/app&#x27;;
+
+bootstrapApplication(App, appConfig)
+  .catch((err) =&gt; console.error(err));</code></pre></figure>
+</section>
+
+<section id="ng-tests">
+  <h2>Tests con Vitest<a class="ancla" href="#ng-tests">#</a></h2>
+  <p>Angular 21+ usa <b>Vitest</b> por defecto. Las tres herramientas clave:</p>
+  <table>
+    <tr><th>Herramienta</th><th>Para qué</th></tr>
+    <tr><td><code>provideHttpClientTesting()</code></td><td>Reemplaza el HttpClient real: ninguna petición sale a internet</td></tr>
+    <tr><td><code>HttpTestingController</code></td><td>Verifica qué peticiones se hicieron y les responde (<code>flush</code>) o las hace fallar (<code>error</code>)</td></tr>
+    <tr><td><code>vi.useFakeTimers()</code></td><td>Controla el reloj: <code>vi.advanceTimersByTime(300)</code> "salta" el debounce sin esperar</td></tr>
+  </table>
+  <p>El test del servicio comprueba que se manden los parámetros y que la respuesta se convierta bien, incluso con campos que faltan:</p>
+  <figure class="codigo"><figcaption>src/app/libros/libros.service.spec.ts</figcaption><pre><code class="language-typescript">import { provideHttpClient } from &#x27;@angular/common/http&#x27;;
+import { HttpTestingController, provideHttpClientTesting } from &#x27;@angular/common/http/testing&#x27;;
+import { TestBed } from &#x27;@angular/core/testing&#x27;;
+
+import { Libro } from &#x27;./libro.model&#x27;;
+import { LibrosService } from &#x27;./libros.service&#x27;;
+
+describe(&#x27;LibrosService&#x27;, () =&gt; {
+  let service: LibrosService;
+  let http: HttpTestingController;
+
+  beforeEach(() =&gt; {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    service = TestBed.inject(LibrosService);
+    http = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() =&gt; http.verify()); // falla si quedó alguna petición sin responder
+
+  it(&#x27;manda el texto como parámetro y convierte la respuesta&#x27;, () =&gt; {
+    let resultado: Libro[] = [];
+    service.buscar(&#x27;borges&#x27;).subscribe((libros) =&gt; (resultado = libros));
+
+    const req = http.expectOne((r) =&gt; r.url === &#x27;https://openlibrary.org/search.json&#x27;);
+    expect(req.request.params.get(&#x27;q&#x27;)).toBe(&#x27;borges&#x27;);
+    expect(req.request.params.get(&#x27;limit&#x27;)).toBe(&#x27;10&#x27;);
+
+    req.flush({
+      numFound: 2,
+      docs: [
+        { key: &#x27;/works/1&#x27;, title: &#x27;Ficciones&#x27;, author_name: [&#x27;Jorge Luis Borges&#x27;], first_publish_year: 1944 },
+        { key: &#x27;/works/2&#x27;, title: &#x27;Sin datos&#x27; },
+      ],
+    });
+
+    expect(resultado).toEqual([
+      { id: &#x27;/works/1&#x27;, titulo: &#x27;Ficciones&#x27;, autores: [&#x27;Jorge Luis Borges&#x27;], anio: 1944 },
+      { id: &#x27;/works/2&#x27;, titulo: &#x27;Sin datos&#x27;, autores: [], anio: null },
+    ]);
+  });
+});</code></pre></figure>
+  <p>El test del componente prueba cada regla del buscador: mínimo 3 letras, debounce, cancelación y recuperación tras un error:</p>
+  <figure class="codigo"><figcaption>src/app/libros/buscador.spec.ts</figcaption><pre><code class="language-typescript">import { provideHttpClient } from &#x27;@angular/common/http&#x27;;
+import { HttpTestingController, provideHttpClientTesting } from &#x27;@angular/common/http/testing&#x27;;
+import { ComponentFixture, TestBed } from &#x27;@angular/core/testing&#x27;;
+
+import { Buscador } from &#x27;./buscador&#x27;;
+
+const URL = &#x27;https://openlibrary.org/search.json&#x27;;
+const respuesta = { numFound: 1, docs: [{ key: &#x27;/works/1&#x27;, title: &#x27;Ficciones&#x27; }] };
+
+describe(&#x27;Buscador&#x27;, () =&gt; {
+  let fixture: ComponentFixture&lt;Buscador&gt;;
+  let componente: Buscador;
+  let http: HttpTestingController;
+
+  beforeEach(() =&gt; {
+    vi.useFakeTimers(); // controlamos el reloj para el debounce de 300 ms
+    TestBed.configureTestingModule({
+      imports: [Buscador],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    fixture = TestBed.createComponent(Buscador);
+    componente = fixture.componentInstance;
+    http = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() =&gt; {
+    http.verify();
+    vi.useRealTimers();
+  });
+
+  function escribir(texto: string) {
+    componente.busqueda.setValue(texto);
+    vi.advanceTimersByTime(300);
+  }
+
+  it(&#x27;no busca con menos de 3 letras&#x27;, () =&gt; {
+    escribir(&#x27;bo&#x27;);
+    http.expectNone(() =&gt; true);
+  });
+
+  it(&#x27;espera 300 ms: una sola petición aunque se escriba rápido&#x27;, () =&gt; {
+    componente.busqueda.setValue(&#x27;bor&#x27;);
+    vi.advanceTimersByTime(100);
+    componente.busqueda.setValue(&#x27;borg&#x27;);
+    vi.advanceTimersByTime(100);
+    componente.busqueda.setValue(&#x27;borges&#x27;);
+    vi.advanceTimersByTime(300);
+
+    const req = http.expectOne((r) =&gt; r.url === URL);
+    expect(req.request.params.get(&#x27;q&#x27;)).toBe(&#x27;borges&#x27;);
+    req.flush(respuesta);
+  });
+
+  it(&#x27;switchMap cancela la búsqueda anterior&#x27;, () =&gt; {
+    escribir(&#x27;borges&#x27;);
+    const vieja = http.expectOne((r) =&gt; r.params.get(&#x27;q&#x27;) === &#x27;borges&#x27;);
+
+    escribir(&#x27;cortazar&#x27;);
+    const nueva = http.expectOne((r) =&gt; r.params.get(&#x27;q&#x27;) === &#x27;cortazar&#x27;);
+
+    expect(vieja.cancelled).toBe(true);
+    nueva.flush(respuesta);
+    expect(componente.total()).toBe(1);
+  });
+
+  it(&#x27;muestra el error en pantalla y la siguiente búsqueda sigue funcionando&#x27;, () =&gt; {
+    escribir(&#x27;borges&#x27;);
+    http.expectOne((r) =&gt; r.url === URL).error(new ProgressEvent(&#x27;error&#x27;));
+
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain(&#x27;No se pudo conectar&#x27;);
+
+    escribir(&#x27;cortazar&#x27;);
+    http.expectOne((r) =&gt; r.url === URL).flush(respuesta);
+
+    fixture.detectChanges();
+    expect(componente.error()).toBeNull();
+    expect(fixture.nativeElement.textContent).toContain(&#x27;1 resultados&#x27;);
+    expect(fixture.nativeElement.textContent).toContain(&#x27;Ficciones&#x27;);
+  });
+});</code></pre></figure>
+  <div class="nota"><strong>http.verify()</strong>En <code>afterEach</code> hace fallar el test si quedó alguna petición sin responder. Atrapa peticiones que no esperabas.</div>
+</section>
+
+<section id="ng-tuyo">
+  <h2>Haz el tuyo: plantilla para cualquier API<a class="ancla" href="#ng-tuyo">#</a></h2>
+  <p>El mismo patrón sirve para buscar países, películas, usuarios de GitHub… Solo cambian 3 cosas: la URL, el tipo de la respuesta y la conversión. Ejemplo con la API pública de países:</p>
+  <ol class="pasos">
+    <li>Genera la carpeta: <code>ng g service paises/paises</code> y <code>ng g component paises/buscador-paises</code>.</li>
+    <li>Define los dos modelos (API y app) y la conversión en el servicio.</li>
+    <li>Copia el componente del buscador cambiando el servicio y el tipo.</li>
+  </ol>
+  <div class="bloque"><pre><code class="language-typescript">// paises/pais.model.ts
+export interface PaisApi {            // lo que devuelve https://restcountries.com/v3.1/name/{texto}
+  cca3: string;
+  name: { common: string };
+  capital?: string[];
+  population: number;
+}
+
+export interface Pais {               // lo que usa tu app
+  id: string;
+  nombre: string;
+  capital: string;
+  poblacion: number;
+}</code></pre></div>
+  <div class="bloque"><pre><code class="language-typescript">// paises/paises.service.ts
+import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { Observable, map } from 'rxjs';
+
+import { Pais, PaisApi } from './pais.model';
+
+@Injectable({ providedIn: 'root' })
+export class PaisesService {
+  private readonly http = inject(HttpClient);
+
+  buscar(texto: string): Observable&lt;Pais[]&gt; {
+    const url = `https://restcountries.com/v3.1/name/${encodeURIComponent(texto)}`;
+    return this.http.get&lt;PaisApi[]&gt;(url).pipe(
+      map((paises) =&gt;
+        paises.map((p) =&gt; ({
+          id: p.cca3,
+          nombre: p.name.common,
+          capital: p.capital?.[0] ?? 'Sin capital',
+          poblacion: p.population,
+        })),
+      ),
+    );
+  }
+}</code></pre></div>
+  <div class="bloque"><pre><code class="language-typescript">// paises/buscador-paises.ts  (misma tubería que el buscador de libros)
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { catchError, debounceTime, distinctUntilChanged, filter, map, of, switchMap, tap } from 'rxjs';
+
+import { Pais } from './pais.model';
+import { PaisesService } from './paises.service';
+
+@Component({
+  selector: 'app-buscador-paises',
+  imports: [ReactiveFormsModule],
+  template: `
+    &lt;input type="search" [formControl]="busqueda" placeholder="Busca un país" /&gt;
+    @if (cargando()) { &lt;p&gt;Buscando…&lt;/p&gt; }
+    @else if (error()) { &lt;p role="alert"&gt;{{ error() }}&lt;/p&gt; }
+    @else {
+      &lt;ul&gt;
+        @for (pais of paises(); track pais.id) {
+          &lt;li&gt;{{ pais.nombre }} — {{ pais.capital }}&lt;/li&gt;
+        } @empty { &lt;li&gt;Sin resultados&lt;/li&gt; }
+      &lt;/ul&gt;
+    }
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class BuscadorPaises {
+  private readonly servicio = inject(PaisesService);
+
+  readonly busqueda = new FormControl('', { nonNullable: true });
+  readonly paises = signal&lt;Pais[]&gt;([]);
+  readonly cargando = signal(false);
+  readonly error = signal&lt;string | null&gt;(null);
+
+  constructor() {
+    this.busqueda.valueChanges
+      .pipe(
+        map((t) =&gt; t.trim()),
+        debounceTime(300),
+        distinctUntilChanged(),
+        filter((t) =&gt; t.length &gt;= 2),
+        tap(() =&gt; {
+          this.cargando.set(true);
+          this.error.set(null);
+        }),
+        switchMap((t) =&gt;
+          this.servicio.buscar(t).pipe(
+            catchError(() =&gt; {
+              this.error.set('No se encontró o no hay conexión.');
+              return of([]);
+            }),
+          ),
+        ),
+        takeUntilDestroyed(),
+      )
+      .subscribe((paises) =&gt; {
+        this.paises.set(paises);
+        this.cargando.set(false);
+      });
+  }
+}</code></pre></div>
+  <p><code>@empty</code> es un bloque opcional de <code>@for</code> que se muestra cuando la lista está vacía.</p>
+</section>
+
+<section id="ng-errores">
+  <h2>Errores comunes<a class="ancla" href="#ng-errores">#</a></h2>
+  <details><summary>NullInjectorError: No provider for HttpClient</summary><p>Falta <code>provideHttpClient()</code> en <code>app.config.ts</code> (o en los <code>providers</code> del test).</p></details>
+  <details><summary>Can't bind to 'formControl' since it isn't a known property of 'input'</summary><p>Falta <code>ReactiveFormsModule</code> en los <code>imports</code> del componente.</p></details>
+  <details><summary>La pantalla no se actualiza</summary><p>Con OnPush, si guardas datos en una variable normal (<code>this.libros = [...]</code>) Angular no se entera. Usa un signal y <code>.set()</code>.</p></details>
+  <details><summary>El buscador deja de funcionar después de un error</summary><p>El <code>catchError</code> está fuera del <code>switchMap</code>. Muévelo adentro, sobre la petición.</p></details>
+  <details><summary>Error de CORS en la consola</summary><p>El servidor de la API no permite peticiones desde tu origen. Open Library sí lo permite; para tu propia API mira <a href="#unir">Conectar Angular con Flask</a>.</p></details>
+  <details><summary>En la plantilla sale "[object Object]" o la función entera</summary><p>Olvidaste los paréntesis al leer el signal: es <code>{{ total() }}</code>, no <code>{{ total }}</code>.</p></details>
+</section>
+
+<!-- ============================== FLASK ============================== -->
+<div class="parte flask" id="flask">
+  <span class="etiqueta">Parte 2 · Flask</span>
+  <h1>API REST de biblioteca</h1>
+  <p>Una API JSON para gestionar <b>autores, libros, socios y préstamos</b>, con PostgreSQL. Lo importante no son las tablas, sino cómo se organiza el código para que crezca sin volverse un desorden: rutas, servicios y repositorios separados, errores claros y operaciones atómicas.</p>
+</div>
+
+<section>
+  <h3>Reglas del negocio que implementa</h3>
+  <ul>
+    <li>Un libro siempre pertenece a un autor que existe; su año no puede ser futuro.</li>
+    <li>No se puede borrar un autor que tiene libros.</li>
+    <li>El email de un socio es único (sin importar mayúsculas).</li>
+    <li>Un libro prestado no se puede volver a prestar hasta que se devuelva.</li>
+    <li>Prestar = crear el préstamo <b>y</b> marcar el libro como no disponible. O pasan las dos cosas, o ninguna.</li>
+  </ul>
+</section>
+
+<section id="fl-instalar">
+  <h2>Instalar y arrancar<a class="ancla" href="#fl-instalar">#</a></h2>
+  <div class="bloque"><pre><code class="language-bash"># 1. PostgreSQL en Docker
+docker run --name pg-biblioteca -e POSTGRES_USER=biblio -e POSTGRES_PASSWORD=biblio123 \
+  -e POSTGRES_DB=biblioteca -p 5432:5432 -d postgres:16
+
+# 2. Entorno virtual de Python
+cd flask-biblioteca
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+
+# 3. Dependencias y variables
+pip install -r requirements.txt
+cp .env.example .env
+
+# 4. Crear las tablas (migraciones)
+flask --app wsgi db upgrade
+
+# 5. Tests y servidor
+pytest -q                        # 16 passed
+flask --app wsgi run --debug     # http://127.0.0.1:5000</code></pre></div>
+  <figure class="codigo"><figcaption>requirements.txt</figcaption><pre><code class="language-plaintext">alembic==1.20.1
+Flask==3.1.3
+Flask-Migrate==4.1.0
+Flask-SQLAlchemy==3.1.1
+gunicorn==26.2.0
+psycopg==3.3.6
+psycopg-binary==3.3.6
+pytest==9.1.1
+python-dotenv==1.2.4
+SQLAlchemy==2.1.6</code></pre></figure>
+  <figure class="codigo"><figcaption>.env.example</figcaption><pre><code class="language-bash">DATABASE_URL=postgresql+psycopg://biblio:biblio123@localhost:5432/biblioteca</code></pre></figure>
+  <div class="ojo"><strong>Nunca subas .env</strong>El <code>.env</code> tiene contraseñas y va en <code>.gitignore</code>. Al repositorio se sube <code>.env.example</code> con valores de ejemplo.</div>
+</section>
+
+<section id="fl-capas">
+  <h2>Arquitectura en 3 capas<a class="ancla" href="#fl-capas">#</a></h2>
+  <p>Cada petición atraviesa las capas en orden. Cada capa tiene <b>un solo trabajo</b> y solo habla con la de abajo.</p>
+  <div class="diagrama">
+    <svg viewBox="0 0 760 210" role="img" aria-label="Petición HTTP pasa por rutas, servicios, repositorios y llega a PostgreSQL; los errores de negocio se traducen a códigos HTTP en errors.py">
+      <defs><marker id="punta2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" style="fill:var(--texto-2)"/></marker></defs>
+      <rect class="caja" x="10" y="30" width="120" height="70" rx="10"/><text x="70" y="60" text-anchor="middle">Petición</text><text class="sub" x="70" y="80" text-anchor="middle">JSON / HTTP</text>
+      <rect class="caja f" x="170" y="30" width="130" height="70" rx="10"/><text x="235" y="60" text-anchor="middle">routes/</text><text class="sub" x="235" y="80" text-anchor="middle">HTTP + formato</text>
+      <rect class="caja f" x="340" y="30" width="130" height="70" rx="10"/><text x="405" y="60" text-anchor="middle">services/</text><text class="sub" x="405" y="80" text-anchor="middle">reglas de negocio</text>
+      <rect class="caja f" x="510" y="30" width="130" height="70" rx="10"/><text x="575" y="60" text-anchor="middle">repositories/</text><text class="sub" x="575" y="80" text-anchor="middle">consultas SQL</text>
+      <rect class="caja" x="670" y="30" width="80" height="70" rx="10"/><text x="710" y="60" text-anchor="middle">Postgres</text><text class="sub" x="710" y="80" text-anchor="middle">models/</text>
+      <path d="M130 65H168" style="stroke:var(--texto-2);stroke-width:1.5;fill:none" marker-end="url(#punta2)"/>
+      <path d="M300 65H338" style="stroke:var(--texto-2);stroke-width:1.5;fill:none" marker-end="url(#punta2)"/>
+      <path d="M470 65H508" style="stroke:var(--texto-2);stroke-width:1.5;fill:none" marker-end="url(#punta2)"/>
+      <path d="M640 65H668" style="stroke:var(--texto-2);stroke-width:1.5;fill:none" marker-end="url(#punta2)"/>
+      <rect class="caja" x="250" y="140" width="300" height="56" rx="10"/><text x="400" y="164" text-anchor="middle">errors.py</text><text class="sub" x="400" y="183" text-anchor="middle">NoEncontrado → 404 · Conflicto → 409 · …</text>
+      <path d="M405 100V138" style="stroke:var(--texto-2);stroke-width:1.5;fill:none;stroke-dasharray:4 4" marker-end="url(#punta2)"/>
+      <text class="sub" x="414" y="124">lanza excepción</text>
+    </svg>
+  </div>
+  <table>
+    <tr><th>Capa</th><th>Sabe de…</th><th>NO sabe de…</th></tr>
+    <tr><td><code>routes/</code></td><td>HTTP: leer JSON, query params, devolver código 201/204</td><td>Reglas de negocio, SQL</td></tr>
+    <tr><td><code>services/</code></td><td>Reglas: "un libro prestado no se presta", transacciones</td><td>HTTP (no devuelve 404, lanza <code>NoEncontrado</code>)</td></tr>
+    <tr><td><code>repositories/</code></td><td>Cómo buscar y guardar en la base de datos</td><td>Reglas ni HTTP</td></tr>
+    <tr><td><code>models/</code></td><td>Forma de las tablas y relaciones</td><td>Todo lo demás</td></tr>
+  </table>
+  <div class="idea"><strong>¿Para qué tanto?</strong>Para proyectos de una tabla es exagerado. Pero en cuanto aparecen reglas ("no prestar si…"), tenerlas en un solo lugar (el servicio) evita que se repitan o contradigan entre rutas. Y puedes probar un servicio sin levantar HTTP.</div>
+</section>
+
+<section id="fl-estructura">
+  <h2>Estructura de carpetas<a class="ancla" href="#fl-estructura">#</a></h2>
+  <div class="bloque"><pre><code class="language-plaintext">flask-biblioteca/
+├── wsgi.py                 ← punto de entrada: app = create_app()
+├── config.py               ← Config (Postgres) y TestConfig (SQLite en memoria)
+├── .env.example            ← DATABASE_URL de ejemplo
+├── requirements.txt
+├── migrations/             ← historial de cambios de la BD (Alembic)
+├── app/
+│   ├── __init__.py         ← create_app(): arma la app
+│   ├── extensions.py       ← db y migrate (instancias compartidas)
+│   ├── errors.py           ← excepción de negocio → código HTTP
+│   ├── models/             ← Autor, Libro, Socio, Prestamo
+│   ├── routes/             ← un blueprint por recurso + validacion.py
+│   ├── services/           ← reglas de negocio + transaccion.py + excepciones.py
+│   └── repositories/       ← consultas SQLAlchemy
+└── tests/                  ← conftest.py (fixtures) + un archivo por recurso</code></pre></div>
+</section>
+
+<section id="fl-factory">
+  <h2>App factory y configuración<a class="ancla" href="#fl-factory">#</a></h2>
+  <p>En vez de crear <code>app = Flask(__name__)</code> suelto, una función <b>fabrica</b> la app. Así los tests pueden crear una app con otra configuración (SQLite en memoria) sin tocar la de verdad.</p>
+  <figure class="codigo"><figcaption>app/__init__.py</figcaption><pre><code class="language-python">from flask import Flask
+
+from .errors import registrar_errores
+from .extensions import db, migrate
+
+
+def create_app(config_class=&quot;config.Config&quot;):
+    app = Flask(__name__)
+    app.config.from_object(config_class)
+    app.json.ensure_ascii = False  # &quot;está&quot; en vez de &quot;está&quot;
+
+    db.init_app(app)
+    migrate.init_app(app, db)
+
+    from . import models  # noqa: F401  (registra las tablas)
+    from .routes.autores import bp as autores_bp
+    from .routes.libros import bp as libros_bp
+    from .routes.prestamos import bp as prestamos_bp
+    from .routes.socios import bp as socios_bp
+
+    app.register_blueprint(autores_bp)
+    app.register_blueprint(libros_bp)
+    app.register_blueprint(socios_bp)
+    app.register_blueprint(prestamos_bp)
+
+    registrar_errores(app)
+    return app</code></pre></figure>
+  <figure class="codigo"><figcaption>app/extensions.py</figcaption><pre><code class="language-python">from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
+migrate = Migrate()</code></pre></figure>
+  <figure class="codigo"><figcaption>config.py</figcaption><pre><code class="language-python">import os
+
+from dotenv import load_dotenv
+
+load_dotenv()  # lee el archivo .env y lo pone en os.environ
+
+
+class Config:
+    SQLALCHEMY_DATABASE_URI = os.environ.get(&quot;DATABASE_URL&quot;)
+    SQLALCHEMY_ENGINE_OPTIONS = {&quot;pool_pre_ping&quot;: True}
+
+
+class TestConfig:
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = os.environ.get(&quot;TEST_DATABASE_URL&quot;, &quot;sqlite:///:memory:&quot;)</code></pre></figure>
+  <figure class="codigo"><figcaption>wsgi.py</figcaption><pre><code class="language-python">from app import create_app
+
+app = create_app()</code></pre></figure>
+  <ul>
+    <li><code>db = SQLAlchemy()</code> se crea en <code>extensions.py</code> <b>sin</b> app, y se conecta después con <code>db.init_app(app)</code>. Así cualquier archivo puede importar <code>db</code> sin imports circulares.</li>
+    <li><code>pool_pre_ping</code> comprueba que la conexión siga viva antes de usarla (evita errores si Postgres se reinició).</li>
+    <li><code>ensure_ascii = False</code> hace que el JSON muestre "está" en vez de <code>"está"</code>.</li>
+  </ul>
+</section>
+
+<section id="fl-modelos">
+  <h2>Modelos SQLAlchemy<a class="ancla" href="#fl-modelos">#</a></h2>
+  <p>Un <b>modelo</b> es una clase Python que representa una tabla. Cada <code>db.Column</code> es una columna.</p>
+  <div class="diagrama">
+    <svg viewBox="0 0 760 170" role="img" aria-label="Relaciones: Autor tiene muchos Libros; Libro y Socio se unen en Prestamo">
+      <defs><marker id="punta3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" style="fill:var(--texto-2)"/></marker></defs>
+      <rect class="caja f" x="10" y="20" width="170" height="80" rx="10"/><text x="95" y="48" text-anchor="middle">autores</text><text class="sub" x="95" y="70" text-anchor="middle">id · nombre · pais</text>
+      <rect class="caja f" x="250" y="20" width="200" height="80" rx="10"/><text x="350" y="48" text-anchor="middle">libros</text><text class="sub" x="350" y="70" text-anchor="middle">id · titulo · anio · disponible</text><text class="sub" x="350" y="88" text-anchor="middle">autor_id → autores.id</text>
+      <rect class="caja f" x="520" y="20" width="230" height="80" rx="10"/><text x="635" y="48" text-anchor="middle">prestamos</text><text class="sub" x="635" y="70" text-anchor="middle">libro_id · socio_id</text><text class="sub" x="635" y="88" text-anchor="middle">fecha_prestamo · fecha_devolucion</text>
+      <rect class="caja f" x="520" y="120" width="230" height="44" rx="10"/><text x="635" y="147" text-anchor="middle">socios  (email único)</text>
+      <path d="M180 60H248" style="stroke:var(--texto-2);stroke-width:1.5;fill:none" marker-end="url(#punta3)"/><text class="sub" x="214" y="52" text-anchor="middle">1 → N</text>
+      <path d="M450 60H518" style="stroke:var(--texto-2);stroke-width:1.5;fill:none" marker-end="url(#punta3)"/><text class="sub" x="484" y="52" text-anchor="middle">1 → N</text>
+      <path d="M635 120V102" style="stroke:var(--texto-2);stroke-width:1.5;fill:none" marker-end="url(#punta3)"/>
+    </svg>
+  </div>
+  <figure class="codigo"><figcaption>app/models/autor.py</figcaption><pre><code class="language-python">from app.extensions import db
+
+
+class Autor(db.Model):
+    __tablename__ = &quot;autores&quot;
+
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(120), nullable=False)
+    pais = db.Column(db.String(80))
+
+    libros = db.relationship(&quot;Libro&quot;, back_populates=&quot;autor&quot;)
+
+    def to_dict(self):
+        return {&quot;id&quot;: self.id, &quot;nombre&quot;: self.nombre, &quot;pais&quot;: self.pais}</code></pre></figure>
+  <figure class="codigo"><figcaption>app/models/libro.py</figcaption><pre><code class="language-python">from app.extensions import db
+
+
+class Libro(db.Model):
+    __tablename__ = &quot;libros&quot;
+
+    id = db.Column(db.Integer, primary_key=True)
+    titulo = db.Column(db.String(200), nullable=False)
+    anio = db.Column(db.Integer)
+    disponible = db.Column(db.Boolean, nullable=False, default=True)
+    autor_id = db.Column(db.Integer, db.ForeignKey(&quot;autores.id&quot;), nullable=False, index=True)
+
+    autor = db.relationship(&quot;Autor&quot;, back_populates=&quot;libros&quot;)
+
+    def to_dict(self):
+        return {
+            &quot;id&quot;: self.id,
+            &quot;titulo&quot;: self.titulo,
+            &quot;anio&quot;: self.anio,
+            &quot;disponible&quot;: self.disponible,
+            &quot;autor_id&quot;: self.autor_id,
+        }</code></pre></figure>
+  <figure class="codigo"><figcaption>app/models/socio.py</figcaption><pre><code class="language-python">from app.extensions import db
+
+
+class Socio(db.Model):
+    __tablename__ = &quot;socios&quot;
+
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(120), nullable=False)
+    email = db.Column(db.String(160), nullable=False, unique=True)
+
+    def to_dict(self):
+        return {&quot;id&quot;: self.id, &quot;nombre&quot;: self.nombre, &quot;email&quot;: self.email}</code></pre></figure>
+  <figure class="codigo"><figcaption>app/models/prestamo.py</figcaption><pre><code class="language-python">from datetime import datetime, timezone
+
+from app.extensions import db
+
+
+def ahora():
+    return datetime.now(timezone.utc)
+
+
+class Prestamo(db.Model):
+    __tablename__ = &quot;prestamos&quot;
+
+    id = db.Column(db.Integer, primary_key=True)
+    libro_id = db.Column(db.Integer, db.ForeignKey(&quot;libros.id&quot;), nullable=False, index=True)
+    socio_id = db.Column(db.Integer, db.ForeignKey(&quot;socios.id&quot;), nullable=False, index=True)
+    fecha_prestamo = db.Column(db.DateTime(timezone=True), nullable=False, default=ahora)
+    fecha_devolucion = db.Column(db.DateTime(timezone=True))
+
+    libro = db.relationship(&quot;Libro&quot;)
+    socio = db.relationship(&quot;Socio&quot;)
+
+    def to_dict(self):
+        return {
+            &quot;id&quot;: self.id,
+            &quot;libro_id&quot;: self.libro_id,
+            &quot;socio_id&quot;: self.socio_id,
+            &quot;fecha_prestamo&quot;: self.fecha_prestamo.isoformat(),
+            &quot;fecha_devolucion&quot;: self.fecha_devolucion.isoformat() if self.fecha_devolucion else None,
+        }</code></pre></figure>
+  <figure class="codigo"><figcaption>app/models/__init__.py</figcaption><pre><code class="language-python">from .autor import Autor
+from .libro import Libro
+from .prestamo import Prestamo
+from .socio import Socio
+
+__all__ = [&quot;Autor&quot;, &quot;Libro&quot;, &quot;Prestamo&quot;, &quot;Socio&quot;]</code></pre></figure>
+  <table>
+    <tr><th>Pieza</th><th>Qué hace</th></tr>
+    <tr><td><code>nullable=False</code></td><td>Columna obligatoria (NOT NULL)</td></tr>
+    <tr><td><code>unique=True</code></td><td>No puede repetirse (el email del socio)</td></tr>
+    <tr><td><code>db.ForeignKey("autores.id")</code></td><td>Clave foránea: el valor debe existir en otra tabla</td></tr>
+    <tr><td><code>index=True</code></td><td>Índice para buscar rápido por esa columna</td></tr>
+    <tr><td><code>db.relationship(...)</code></td><td>Acceso en Python: <code>libro.autor</code>, <code>autor.libros</code> (no crea columnas)</td></tr>
+    <tr><td><code>back_populates</code></td><td>Conecta las dos direcciones de la relación</td></tr>
+    <tr><td><code>default=ahora</code></td><td>Se pasa la <b>función</b> (sin paréntesis) para que se llame en cada inserción</td></tr>
+    <tr><td><code>to_dict()</code></td><td>Convierte el objeto a diccionario para devolverlo como JSON</td></tr>
+  </table>
+  <div class="ojo"><strong>default=ahora, no default=ahora()</strong>Con paréntesis, la fecha se calcularía una sola vez al arrancar el servidor y todos los préstamos tendrían la misma.</div>
+</section>
+
+<section id="fl-migraciones">
+  <h2>Migraciones con Alembic<a class="ancla" href="#fl-migraciones">#</a></h2>
+  <p>Una <b>migración</b> es un archivo que describe un cambio en la base de datos (crear tabla, agregar columna). Es como "git para el esquema": todos los entornos aplican los mismos pasos en el mismo orden.</p>
+  <div class="bloque"><pre><code class="language-bash">flask --app wsgi db init                          # solo la primera vez: crea migrations/
+flask --app wsgi db migrate -m "tablas iniciales" # compara modelos vs BD y genera el archivo
+flask --app wsgi db upgrade                       # aplica las migraciones pendientes
+flask --app wsgi db downgrade                     # deshace la última</code></pre></div>
+  <div class="nota"><strong>Revisa siempre el archivo generado</strong><code>migrate</code> adivina los cambios comparando. Si renombras una columna, puede interpretarlo como "borrar y crear" y perder datos. Abre el archivo en <code>migrations/versions/</code> antes del <code>upgrade</code>.</div>
+</section>
+
+<section id="fl-rutas">
+  <h2>Rutas y blueprints<a class="ancla" href="#fl-rutas">#</a></h2>
+  <p>Un <b>blueprint</b> agrupa las rutas de un recurso con un prefijo común. Las rutas son delgadas: leen la entrada, validan el formato, llaman al servicio y devuelven JSON con su código.</p>
+  <figure class="codigo"><figcaption>app/routes/autores.py</figcaption><pre><code class="language-python">from flask import Blueprint
+
+from app.services import autores_service
+
+from .validacion import leer_json, pagina_de_query, texto
+
+bp = Blueprint(&quot;autores&quot;, __name__, url_prefix=&quot;/autores&quot;)
+
+
+@bp.get(&quot;&quot;)
+def listar():
+    resultado = autores_service.listar(pagina_de_query())
+    return {
+        &quot;items&quot;: [a.to_dict() for a in resultado.items],
+        &quot;pagina&quot;: resultado.page,
+        &quot;paginas&quot;: resultado.pages,
+        &quot;total&quot;: resultado.total,
+    }
+
+
+@bp.post(&quot;&quot;)
+def crear():
+    datos = leer_json()
+    autor = autores_service.crear(
+        nombre=texto(datos, &quot;nombre&quot;, 120),
+        pais=texto(datos, &quot;pais&quot;, 80, obligatorio=False),
+    )
+    return autor.to_dict(), 201
+
+
+@bp.get(&quot;/&lt;int:autor_id&gt;/libros&quot;)
+def libros(autor_id):
+    libros = autores_service.libros_de(autor_id)
+    return {&quot;items&quot;: [l.to_dict() for l in libros]}
+
+
+@bp.delete(&quot;/&lt;int:autor_id&gt;&quot;)
+def eliminar(autor_id):
+    autores_service.eliminar(autor_id)
+    return &quot;&quot;, 204</code></pre></figure>
+  <ul>
+    <li><code>@bp.get("")</code>, <code>@bp.post("")</code>… son atajos de <code>@bp.route(..., methods=[...])</code>.</li>
+    <li><code>&lt;int:autor_id&gt;</code> convierte el trozo de URL a entero; si no es número, Flask responde 404 solo.</li>
+    <li>Devolver un <code>dict</code> lo convierte en JSON. La tupla <code>(dict, 201)</code> agrega el código.</li>
+    <li><code>return "", 204</code>: éxito sin contenido (típico de DELETE).</li>
+  </ul>
+  <details><summary>Ver las demás rutas (libros, socios, préstamos)</summary>
+    <figure class="codigo"><figcaption>app/routes/libros.py</figcaption><pre><code class="language-python">from flask import Blueprint, request
+
+from app.services import libros_service
+from app.services.excepciones import DatosInvalidos
+
+from .validacion import booleano, entero, leer_json, texto
+
+bp = Blueprint(&quot;libros&quot;, __name__, url_prefix=&quot;/libros&quot;)
+
+
+@bp.get(&quot;&quot;)
+def listar():
+    filtro = request.args.get(&quot;disponible&quot;)
+    disponible = None
+    if filtro is not None:
+        if filtro.lower() not in (&quot;true&quot;, &quot;false&quot;):
+            raise DatosInvalidos(&quot;&#x27;disponible&#x27; debe ser true o false&quot;)
+        disponible = filtro.lower() == &quot;true&quot;
+    return {&quot;items&quot;: [l.to_dict() for l in libros_service.listar(disponible)]}
+
+
+@bp.post(&quot;&quot;)
+def crear():
+    datos = leer_json()
+    libro = libros_service.crear(
+        titulo=texto(datos, &quot;titulo&quot;, 200),
+        autor_id=entero(datos, &quot;autor_id&quot;),
+        anio=entero(datos, &quot;anio&quot;, obligatorio=False),
+        disponible=booleano(datos, &quot;disponible&quot;, por_defecto=True),
+    )
+    return libro.to_dict(), 201
+
+
+@bp.patch(&quot;/&lt;int:libro_id&gt;&quot;)
+def actualizar(libro_id):
+    datos = leer_json()
+    cambios = {}
+    if &quot;titulo&quot; in datos:
+        cambios[&quot;titulo&quot;] = texto(datos, &quot;titulo&quot;, 200)
+    if &quot;anio&quot; in datos:
+        cambios[&quot;anio&quot;] = entero(datos, &quot;anio&quot;, obligatorio=False)
+    if &quot;disponible&quot; in datos:
+        cambios[&quot;disponible&quot;] = booleano(datos, &quot;disponible&quot;, por_defecto=True)
+    if &quot;autor_id&quot; in datos:
+        cambios[&quot;autor_id&quot;] = entero(datos, &quot;autor_id&quot;)
+
+    libro = libros_service.actualizar(libro_id, cambios)
+    return libro.to_dict()</code></pre></figure>
+    <figure class="codigo"><figcaption>app/routes/socios.py</figcaption><pre><code class="language-python">from flask import Blueprint
+
+from app.services import socios_service
+from app.services.excepciones import DatosInvalidos
+
+from .validacion import leer_json, texto
+
+bp = Blueprint(&quot;socios&quot;, __name__, url_prefix=&quot;/socios&quot;)
+
+
+@bp.post(&quot;&quot;)
+def crear():
+    datos = leer_json()
+    email = texto(datos, &quot;email&quot;, 160)
+    if &quot;@&quot; not in email:
+        raise DatosInvalidos(&quot;&#x27;email&#x27; no es válido&quot;)
+    socio = socios_service.crear(nombre=texto(datos, &quot;nombre&quot;, 120), email=email)
+    return socio.to_dict(), 201
+
+
+@bp.get(&quot;/&lt;int:socio_id&gt;/prestamos&quot;)
+def prestamos(socio_id):
+    activos = socios_service.prestamos_activos(socio_id)
+    return {&quot;items&quot;: [p.to_dict() for p in activos]}</code></pre></figure>
+    <figure class="codigo"><figcaption>app/routes/prestamos.py</figcaption><pre><code class="language-python">from flask import Blueprint
+
+from app.services import prestamos_service
+
+from .validacion import entero, leer_json
+
+bp = Blueprint(&quot;prestamos&quot;, __name__, url_prefix=&quot;/prestamos&quot;)
+
+
+@bp.post(&quot;&quot;)
+def prestar():
+    datos = leer_json()
+    prestamo = prestamos_service.prestar(
+        libro_id=entero(datos, &quot;libro_id&quot;),
+        socio_id=entero(datos, &quot;socio_id&quot;),
+    )
+    return prestamo.to_dict(), 201
+
+
+@bp.post(&quot;/&lt;int:prestamo_id&gt;/devolver&quot;)
+def devolver(prestamo_id):
+    prestamo = prestamos_service.devolver(prestamo_id)
+    return prestamo.to_dict()</code></pre></figure>
+  </details>
+  <p>El <b>PATCH</b> de libros solo cambia los campos que llegan: arma un diccionario <code>cambios</code> con lo enviado y el servicio aplica solo eso.</p>
+</section>
+
+<section id="fl-validacion">
+  <h2>Validar formato vs. validar negocio<a class="ancla" href="#fl-validacion">#</a></h2>
+  <p>Hay dos tipos de validación y viven en lugares distintos:</p>
+  <table>
+    <tr><th></th><th>Formato (en <code>routes/validacion.py</code>)</th><th>Negocio (en <code>services/</code>)</th></tr>
+    <tr><td>Pregunta</td><td>¿Llegó? ¿Es del tipo correcto? ¿Cabe en la columna?</td><td>¿Tiene sentido para el negocio?</td></tr>
+    <tr><td>Ejemplos</td><td><code>nombre</code> es texto no vacío de máx. 120</td><td>El año no es futuro; el autor existe</td></tr>
+    <tr><td>Necesita BD</td><td>No</td><td>A veces</td></tr>
+    <tr><td>Código</td><td>400</td><td>404 / 409 / 422</td></tr>
+  </table>
+  <figure class="codigo"><figcaption>app/routes/validacion.py</figcaption><pre><code class="language-python">&quot;&quot;&quot;Validación de FORMATO: ¿llegó el dato? ¿es del tipo correcto? ¿cabe en la columna?
+Las reglas de NEGOCIO (año futuro, libro prestado...) viven en los servicios.&quot;&quot;&quot;
+
+from flask import request
+
+from app.services.excepciones import DatosInvalidos
+
+
+def leer_json():
+    datos = request.get_json(silent=True)
+    if not isinstance(datos, dict):
+        raise DatosInvalidos(&quot;Se esperaba un objeto JSON&quot;)
+    return datos
+
+
+def texto(datos, campo, max_largo, obligatorio=True):
+    valor = datos.get(campo)
+    if valor is None and not obligatorio:
+        return None
+    if not isinstance(valor, str) or not valor.strip():
+        raise DatosInvalidos(f&quot;&#x27;{campo}&#x27; es obligatorio y debe ser texto&quot;)
+    valor = valor.strip()
+    if len(valor) &gt; max_largo:
+        raise DatosInvalidos(f&quot;&#x27;{campo}&#x27; admite como máximo {max_largo} caracteres&quot;)
+    return valor
+
+
+def entero(datos, campo, obligatorio=True):
+    valor = datos.get(campo)
+    if valor is None and not obligatorio:
+        return None
+    # En Python, True es un int: hay que excluir bool a mano
+    if not isinstance(valor, int) or isinstance(valor, bool):
+        raise DatosInvalidos(f&quot;&#x27;{campo}&#x27; debe ser un número entero&quot;)
+    return valor
+
+
+def booleano(datos, campo, por_defecto):
+    valor = datos.get(campo, por_defecto)
+    if not isinstance(valor, bool):
+        raise DatosInvalidos(f&quot;&#x27;{campo}&#x27; debe ser true o false&quot;)
+    return valor
+
+
+def pagina_de_query():
+    pagina = request.args.get(&quot;pagina&quot;, 1, type=int)
+    if pagina &lt; 1:
+        raise DatosInvalidos(&quot;&#x27;pagina&#x27; debe ser 1 o mayor&quot;)
+    return pagina</code></pre></figure>
+  <div class="ojo"><strong>La trampa de bool en Python</strong><code>isinstance(True, int)</code> es <code>True</code>. Sin el chequeo extra, <code>{"autor_id": true}</code> pasaría como el autor 1.</div>
+</section>
+
+<section id="fl-servicios">
+  <h2>Servicios: las reglas del negocio<a class="ancla" href="#fl-servicios">#</a></h2>
+  <p>Los servicios reciben datos ya validados en formato, aplican las reglas y lanzan <b>excepciones de negocio</b> cuando algo no se puede. No importan nada de Flask.</p>
+  <figure class="codigo"><figcaption>app/services/excepciones.py</figcaption><pre><code class="language-python">class ErrorDeNegocio(Exception):
+    &quot;&quot;&quot;Base de todos los errores que el negocio puede lanzar. No sabe nada de HTTP.&quot;&quot;&quot;
+
+    def __init__(self, mensaje):
+        super().__init__(mensaje)
+        self.mensaje = mensaje
+
+
+class DatosInvalidos(ErrorDeNegocio):
+    pass
+
+
+class NoEncontrado(ErrorDeNegocio):
+    pass
+
+
+class Conflicto(ErrorDeNegocio):
+    pass
+
+
+class ReglaDeNegocio(ErrorDeNegocio):
+    pass</code></pre></figure>
+  <figure class="codigo"><figcaption>app/services/libros_service.py</figcaption><pre><code class="language-python">from datetime import date
+
+from app.models import Libro
+from app.repositories import autores_repo, libros_repo
+
+from .excepciones import NoEncontrado, ReglaDeNegocio
+from .transaccion import transaccion
+
+
+def _validar_anio(anio):
+    if anio is not None and anio &gt; date.today().year:
+        raise ReglaDeNegocio(&quot;El año no puede ser futuro&quot;)
+
+
+def _validar_autor(autor_id):
+    if autores_repo.obtener(autor_id) is None:
+        raise NoEncontrado(&quot;Autor no encontrado&quot;)
+
+
+def listar(disponible=None):
+    return libros_repo.listar(disponible)
+
+
+def crear(titulo, autor_id, anio=None, disponible=True):
+    _validar_autor(autor_id)
+    _validar_anio(anio)
+    libro = Libro(titulo=titulo, autor_id=autor_id, anio=anio, disponible=disponible)
+    with transaccion():
+        libros_repo.agregar(libro)
+    return libro
+
+
+def actualizar(libro_id, cambios):
+    libro = libros_repo.obtener(libro_id)
+    if libro is None:
+        raise NoEncontrado(&quot;Libro no encontrado&quot;)
+    if &quot;autor_id&quot; in cambios:
+        _validar_autor(cambios[&quot;autor_id&quot;])
+    if &quot;anio&quot; in cambios:
+        _validar_anio(cambios[&quot;anio&quot;])
+
+    with transaccion():
+        for campo, valor in cambios.items():
+            setattr(libro, campo, valor)
+    return libro</code></pre></figure>
+  <figure class="codigo"><figcaption>app/services/autores_service.py</figcaption><pre><code class="language-python">from app.models import Autor
+from app.repositories import autores_repo, libros_repo
+
+from .excepciones import Conflicto, NoEncontrado
+from .transaccion import transaccion
+
+
+def listar(pagina, por_pagina=10):
+    return autores_repo.listar_paginado(pagina, por_pagina)
+
+
+def crear(nombre, pais=None):
+    autor = Autor(nombre=nombre, pais=pais)
+    with transaccion():
+        autores_repo.agregar(autor)
+    return autor
+
+
+def libros_de(autor_id):
+    if autores_repo.obtener(autor_id) is None:
+        raise NoEncontrado(&quot;Autor no encontrado&quot;)
+    return libros_repo.de_autor(autor_id)
+
+
+def eliminar(autor_id):
+    autor = autores_repo.obtener(autor_id)
+    if autor is None:
+        raise NoEncontrado(&quot;Autor no encontrado&quot;)
+    if autores_repo.tiene_libros(autor_id):
+        raise Conflicto(&quot;El autor tiene libros; no se puede borrar&quot;)
+    with transaccion():
+        autores_repo.eliminar(autor)</code></pre></figure>
+  <p>El servicio de socios muestra un patrón importante: <b>chequear y además confiar en la BD</b>.</p>
+  <figure class="codigo"><figcaption>app/services/socios_service.py</figcaption><pre><code class="language-python">from sqlalchemy.exc import IntegrityError
+
+from app.models import Socio
+from app.repositories import prestamos_repo, socios_repo
+
+from .excepciones import Conflicto, NoEncontrado
+from .transaccion import transaccion
+
+
+def crear(nombre, email):
+    email = email.lower()
+    if socios_repo.por_email(email) is not None:
+        raise Conflicto(&quot;Ya existe un socio con ese email&quot;)
+
+    socio = Socio(nombre=nombre, email=email)
+    try:
+        with transaccion():
+            socios_repo.agregar(socio)
+    except IntegrityError:
+        # Dos peticiones al mismo tiempo pasaron el chequeo de arriba:
+        # la restricción UNIQUE de la base de datos es la última defensa.
+        raise Conflicto(&quot;Ya existe un socio con ese email&quot;)
+    return socio
+
+
+def prestamos_activos(socio_id):
+    if socios_repo.obtener(socio_id) is None:
+        raise NoEncontrado(&quot;Socio no encontrado&quot;)
+    return prestamos_repo.activos_de_socio(socio_id)</code></pre></figure>
+  <div class="nota"><strong>¿Por qué dos chequeos del email?</strong>El primero (<code>por_email</code>) da un mensaje claro en el caso normal. Pero si dos peticiones llegan al mismo milisegundo, ambas pasan ese chequeo. La restricción <code>UNIQUE</code> de la base de datos es la que de verdad garantiza que no haya duplicados; capturamos su <code>IntegrityError</code> y respondemos 409 igual.</div>
+</section>
+
+<section id="fl-repos">
+  <h2>Repositorios: solo consultas<a class="ancla" href="#fl-repos">#</a></h2>
+  <p>Funciones pequeñas con nombres del dominio (<code>activos_de_socio</code>, <code>tiene_libros</code>) que esconden el SQLAlchemy. Usan el estilo moderno de SQLAlchemy 2: <code>select()</code> + <code>db.session.scalars()</code>.</p>
+  <figure class="codigo"><figcaption>app/repositories/libros_repo.py</figcaption><pre><code class="language-python">from sqlalchemy import select
+
+from app.extensions import db
+from app.models import Libro
+
+
+def obtener(libro_id, bloquear=False):
+    # bloquear=True -&gt; SELECT ... FOR UPDATE en PostgreSQL
+    return db.session.get(Libro, libro_id, with_for_update=bloquear)
+
+
+def listar(disponible=None):
+    consulta = select(Libro).order_by(Libro.id)
+    if disponible is not None:
+        consulta = consulta.where(Libro.disponible == disponible)
+    return db.session.scalars(consulta).all()
+
+
+def de_autor(autor_id):
+    consulta = select(Libro).where(Libro.autor_id == autor_id).order_by(Libro.id)
+    return db.session.scalars(consulta).all()
+
+
+def agregar(libro):
+    db.session.add(libro)</code></pre></figure>
+  <figure class="codigo"><figcaption>app/repositories/autores_repo.py</figcaption><pre><code class="language-python">from sqlalchemy import exists, select
+
+from app.extensions import db
+from app.models import Autor, Libro
+
+
+def obtener(autor_id):
+    return db.session.get(Autor, autor_id)
+
+
+def listar_paginado(pagina, por_pagina):
+    consulta = select(Autor).order_by(Autor.id)
+    return db.paginate(consulta, page=pagina, per_page=por_pagina, error_out=False)
+
+
+def tiene_libros(autor_id):
+    consulta = select(exists().where(Libro.autor_id == autor_id))
+    return db.session.scalar(consulta)
+
+
+def agregar(autor):
+    db.session.add(autor)
+
+
+def eliminar(autor):
+    db.session.delete(autor)</code></pre></figure>
+  <details><summary>Ver socios_repo y prestamos_repo</summary>
+    <figure class="codigo"><figcaption>app/repositories/socios_repo.py</figcaption><pre><code class="language-python">from sqlalchemy import select
+
+from app.extensions import db
+from app.models import Socio
+
+
+def obtener(socio_id):
+    return db.session.get(Socio, socio_id)
+
+
+def por_email(email):
+    return db.session.scalar(select(Socio).where(Socio.email == email))
+
+
+def agregar(socio):
+    db.session.add(socio)</code></pre></figure>
+    <figure class="codigo"><figcaption>app/repositories/prestamos_repo.py</figcaption><pre><code class="language-python">from sqlalchemy import select
+
+from app.extensions import db
+from app.models import Prestamo
+
+
+def obtener(prestamo_id, bloquear=False):
+    return db.session.get(Prestamo, prestamo_id, with_for_update=bloquear)
+
+
+def activos_de_socio(socio_id):
+    consulta = (
+        select(Prestamo)
+        .where(Prestamo.socio_id == socio_id, Prestamo.fecha_devolucion.is_(None))
+        .order_by(Prestamo.id)
+    )
+    return db.session.scalars(consulta).all()
+
+
+def agregar(prestamo):
+    db.session.add(prestamo)</code></pre></figure>
+  </details>
+  <table>
+    <tr><th>Expresión</th><th>Devuelve</th></tr>
+    <tr><td><code>db.session.get(Modelo, id)</code></td><td>Un objeto o <code>None</code> (por clave primaria)</td></tr>
+    <tr><td><code>db.session.scalars(select(...)).all()</code></td><td>Lista de objetos</td></tr>
+    <tr><td><code>db.session.scalar(select(...))</code></td><td>Un solo valor u objeto (o <code>None</code>)</td></tr>
+    <tr><td><code>select(exists().where(...))</code></td><td><code>True</code>/<code>False</code> sin traer filas</td></tr>
+    <tr><td><code>db.paginate(consulta, page=, per_page=)</code></td><td>Objeto con <code>.items</code>, <code>.page</code>, <code>.pages</code>, <code>.total</code></td></tr>
+  </table>
+</section>
+
+<section id="fl-errores">
+  <h2>De excepción de negocio a código HTTP<a class="ancla" href="#fl-errores">#</a></h2>
+  <p>Un único lugar traduce errores a respuestas. Las rutas y servicios solo hacen <code>raise NoEncontrado("...")</code> y no se preocupan del formato de la respuesta.</p>
+  <figure class="codigo"><figcaption>app/errors.py</figcaption><pre><code class="language-python">from werkzeug.exceptions import HTTPException
+
+from .extensions import db
+from .services.excepciones import (
+    Conflicto,
+    DatosInvalidos,
+    ErrorDeNegocio,
+    NoEncontrado,
+    ReglaDeNegocio,
+)
+
+# Traducción: error de negocio -&gt; código HTTP. Solo esta capa conoce HTTP.
+CODIGOS = {
+    DatosInvalidos: 400,
+    NoEncontrado: 404,
+    Conflicto: 409,
+    ReglaDeNegocio: 422,
+}
+
+
+def registrar_errores(app):
+    @app.errorhandler(ErrorDeNegocio)
+    def error_de_negocio(e):
+        return {&quot;error&quot;: e.mensaje}, CODIGOS.get(type(e), 400)
+
+    @app.errorhandler(HTTPException)
+    def error_http(e):
+        return {&quot;error&quot;: e.name}, e.code
+
+    @app.errorhandler(Exception)
+    def error_inesperado(e):
+        db.session.rollback()
+        app.logger.exception(&quot;Error no controlado&quot;)
+        return {&quot;error&quot;: &quot;Error interno del servidor&quot;}, 500</code></pre></figure>
+  <table>
+    <tr><th>Código</th><th>Significa</th><th>Ejemplo en la API</th></tr>
+    <tr><td><code>200</code></td><td>OK</td><td>GET, PATCH, devolver préstamo</td></tr>
+    <tr><td><code>201</code></td><td>Creado</td><td>POST de autor, libro, socio, préstamo</td></tr>
+    <tr><td><code>204</code></td><td>OK sin contenido</td><td>DELETE de autor</td></tr>
+    <tr><td><code>400</code></td><td>Datos con formato inválido</td><td>Falta <code>nombre</code>, <code>pagina=-1</code></td></tr>
+    <tr><td><code>404</code></td><td>No existe</td><td>Autor o socio inexistente</td></tr>
+    <tr><td><code>409</code></td><td>Conflicto con el estado actual</td><td>Libro ya prestado, email repetido, autor con libros</td></tr>
+    <tr><td><code>422</code></td><td>Formato bien, pero viola una regla</td><td>Año futuro</td></tr>
+    <tr><td><code>500</code></td><td>Error inesperado</td><td>Bug; se hace rollback y se registra en el log</td></tr>
+  </table>
+  <p>Todas las respuestas de error tienen la misma forma, fácil de mostrar en un frontend: <code>{"error": "Autor no encontrado"}</code>.</p>
+</section>
+
+<section id="fl-transacciones">
+  <h2>Transacciones y bloqueos<a class="ancla" href="#fl-transacciones">#</a></h2>
+  <p>Una <b>transacción</b> agrupa varios cambios para que se guarden todos juntos o ninguno. Este helper lo hace con un <code>with</code>:</p>
+  <figure class="codigo"><figcaption>app/services/transaccion.py</figcaption><pre><code class="language-python">from contextlib import contextmanager
+
+from app.extensions import db
+
+
+@contextmanager
+def transaccion():
+    &quot;&quot;&quot;Todo lo que pase dentro del `with` se guarda junto, o no se guarda nada.&quot;&quot;&quot;
+    try:
+        yield
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise</code></pre></figure>
+  <p>Prestar un libro hace <b>dos</b> cambios: crear el préstamo y marcar el libro como no disponible. Si el servidor se cae entre los dos, sin transacción quedaría un préstamo de un libro "disponible".</p>
+  <figure class="codigo"><figcaption>app/services/prestamos_service.py</figcaption><pre><code class="language-python">from app.models import Prestamo
+from app.models.prestamo import ahora
+from app.repositories import libros_repo, prestamos_repo, socios_repo
+
+from .excepciones import Conflicto, NoEncontrado
+from .transaccion import transaccion
+
+
+def prestar(libro_id, socio_id):
+    with transaccion():
+        if socios_repo.obtener(socio_id) is None:
+            raise NoEncontrado(&quot;Socio no encontrado&quot;)
+
+        libro = libros_repo.obtener(libro_id, bloquear=True)
+        if libro is None:
+            raise NoEncontrado(&quot;Libro no encontrado&quot;)
+        if not libro.disponible:
+            raise Conflicto(&quot;El libro ya está prestado&quot;)
+
+        prestamo = Prestamo(libro_id=libro_id, socio_id=socio_id)
+        prestamos_repo.agregar(prestamo)
+        libro.disponible = False  # segundo cambio, en la MISMA transacción
+    return prestamo
+
+
+def devolver(prestamo_id):
+    with transaccion():
+        prestamo = prestamos_repo.obtener(prestamo_id, bloquear=True)
+        if prestamo is None:
+            raise NoEncontrado(&quot;Préstamo no encontrado&quot;)
+        if prestamo.fecha_devolucion is not None:
+            raise Conflicto(&quot;El préstamo ya fue devuelto&quot;)
+
+        prestamo.fecha_devolucion = ahora()
+        prestamo.libro.disponible = True
+    return prestamo</code></pre></figure>
+  <h3>¿Qué es <code>bloquear=True</code>?</h3>
+  <p>Genera <code>SELECT … FOR UPDATE</code> en PostgreSQL: bloquea la fila del libro hasta que termine la transacción. Si dos personas intentan prestar el mismo libro a la vez, la segunda espera, y cuando lee el libro ya ve <code>disponible = False</code> y recibe 409.</p>
+  <div class="diagrama">
+    <svg viewBox="0 0 760 170" role="img" aria-label="Dos peticiones simultáneas: A bloquea el libro, B espera; A confirma; B lee disponible=false y recibe 409">
+      <text x="20" y="30">Petición A</text><text x="20" y="120">Petición B</text>
+      <rect class="caja f" x="130" y="12" width="190" height="30" rx="6"/><text class="sub" x="225" y="32" text-anchor="middle">SELECT … FOR UPDATE ✔</text>
+      <rect class="caja f" x="330" y="12" width="190" height="30" rx="6"/><text class="sub" x="425" y="32" text-anchor="middle">crea préstamo + COMMIT</text>
+      <rect class="caja" x="150" y="102" width="360" height="30" rx="6" style="stroke-dasharray:5 4"/><text class="sub" x="330" y="122" text-anchor="middle">SELECT … FOR UPDATE  (espera a que A termine)</text>
+      <rect class="caja f" x="530" y="102" width="220" height="30" rx="6"/><text class="sub" x="640" y="122" text-anchor="middle">disponible = false → 409</text>
+      <path d="M520 42 C 540 70, 540 80, 528 100" style="stroke:var(--texto-2);stroke-width:1.5;fill:none" marker-end="url(#punta3)"/>
+      <text class="sub" x="548" y="76">libera</text>
+    </svg>
+  </div>
+  <div class="nota"><strong>SQLite no lo soporta</strong>Los tests usan SQLite en memoria, donde <code>FOR UPDATE</code> se ignora. La atomicidad sí se prueba (ver <code>test_atomicidad.py</code>); el bloqueo real solo funciona en PostgreSQL.</div>
+</section>
+
+<section id="fl-endpoints">
+  <h2>Endpoints y ejemplos con curl<a class="ancla" href="#fl-endpoints">#</a></h2>
+  <table>
+    <tr><th>Método</th><th>Ruta</th><th>Qué hace</th><th>Éxito</th></tr>
+    <tr><td>GET</td><td><code>/autores?pagina=1</code></td><td>Lista paginada (10 por página)</td><td>200</td></tr>
+    <tr><td>POST</td><td><code>/autores</code></td><td>Crea autor <code>{nombre, pais?}</code></td><td>201</td></tr>
+    <tr><td>GET</td><td><code>/autores/&lt;id&gt;/libros</code></td><td>Libros de un autor</td><td>200</td></tr>
+    <tr><td>DELETE</td><td><code>/autores/&lt;id&gt;</code></td><td>Borra si no tiene libros</td><td>204</td></tr>
+    <tr><td>GET</td><td><code>/libros?disponible=true</code></td><td>Lista, filtro opcional</td><td>200</td></tr>
+    <tr><td>POST</td><td><code>/libros</code></td><td>Crea libro <code>{titulo, autor_id, anio?, disponible?}</code></td><td>201</td></tr>
+    <tr><td>PATCH</td><td><code>/libros/&lt;id&gt;</code></td><td>Cambia solo los campos enviados</td><td>200</td></tr>
+    <tr><td>POST</td><td><code>/socios</code></td><td>Crea socio <code>{nombre, email}</code></td><td>201</td></tr>
+    <tr><td>GET</td><td><code>/socios/&lt;id&gt;/prestamos</code></td><td>Préstamos sin devolver del socio</td><td>200</td></tr>
+    <tr><td>POST</td><td><code>/prestamos</code></td><td>Presta <code>{libro_id, socio_id}</code></td><td>201</td></tr>
+    <tr><td>POST</td><td><code>/prestamos/&lt;id&gt;/devolver</code></td><td>Registra la devolución</td><td>200</td></tr>
+  </table>
+  <p>Un recorrido completo para probar a mano (con el servidor corriendo):</p>
+  <div class="bloque"><pre><code class="language-bash">API=http://127.0.0.1:5000
+
+curl -s -X POST $API/autores -H 'Content-Type: application/json' \
+  -d '{"nombre": "Jorge Luis Borges", "pais": "Argentina"}'
+# {"id": 1, "nombre": "Jorge Luis Borges", "pais": "Argentina"}
+
+curl -s -X POST $API/libros -H 'Content-Type: application/json' \
+  -d '{"titulo": "Ficciones", "anio": 1944, "autor_id": 1}'
+
+curl -s -X POST $API/socios -H 'Content-Type: application/json' \
+  -d '{"nombre": "Ana", "email": "ana@mail.com"}'
+
+curl -s -X POST $API/prestamos -H 'Content-Type: application/json' \
+  -d '{"libro_id": 1, "socio_id": 1}'
+
+curl -s "$API/libros?disponible=false"           # Ficciones aparece como prestado
+
+curl -s -X POST $API/prestamos -H 'Content-Type: application/json' \
+  -d '{"libro_id": 1, "socio_id": 1}'
+# {"error": "El libro ya está prestado"}   (409)
+
+curl -s -X POST $API/prestamos/1/devolver</code></pre></div>
+</section>
+
+<section id="fl-tests">
+  <h2>Tests con pytest<a class="ancla" href="#fl-tests">#</a></h2>
+  <p>Las <b>fixtures</b> son funciones que preparan lo que un test necesita. pytest las inyecta por nombre: si un test pide <code>libro_id</code>, pytest crea primero el <code>client</code>, luego un autor y luego el libro.</p>
+  <figure class="codigo"><figcaption>tests/conftest.py</figcaption><pre><code class="language-python">import pytest
+
+from app import create_app
+from app.extensions import db
+from config import TestConfig
+
+
+@pytest.fixture
+def app():
+    app = create_app(TestConfig)
+    with app.app_context():
+        db.create_all()
+        yield app
+        db.session.remove()
+        db.drop_all()
+
+
+@pytest.fixture
+def client(app):
+    return app.test_client()
+
+
+@pytest.fixture
+def autor_id(client):
+    return client.post(&quot;/autores&quot;, json={&quot;nombre&quot;: &quot;Borges&quot;}).get_json()[&quot;id&quot;]
+
+
+@pytest.fixture
+def libro_id(client, autor_id):
+    r = client.post(&quot;/libros&quot;, json={&quot;titulo&quot;: &quot;Ficciones&quot;, &quot;anio&quot;: 1944, &quot;autor_id&quot;: autor_id})
+    return r.get_json()[&quot;id&quot;]
+
+
+@pytest.fixture
+def socio_id(client):
+    return client.post(&quot;/socios&quot;, json={&quot;nombre&quot;: &quot;Ana&quot;, &quot;email&quot;: &quot;ana@mail.com&quot;}).get_json()[&quot;id&quot;]</code></pre></figure>
+  <figure class="codigo"><figcaption>pytest.ini</figcaption><pre><code class="language-ini">[pytest]
+pythonpath = .
+testpaths = tests</code></pre></figure>
+  <p>Cada test arranca con una base de datos vacía (<code>create_all</code> / <code>drop_all</code>), así que no dependen entre sí.</p>
+  <figure class="codigo"><figcaption>tests/test_prestamos.py</figcaption><pre><code class="language-python">def test_prestar_marca_el_libro_como_no_disponible(client, libro_id, socio_id):
+    r = client.post(&quot;/prestamos&quot;, json={&quot;libro_id&quot;: libro_id, &quot;socio_id&quot;: socio_id})
+    assert r.status_code == 201
+
+    libros = client.get(&quot;/libros?disponible=false&quot;).get_json()[&quot;items&quot;]
+    assert [l[&quot;id&quot;] for l in libros] == [libro_id]
+
+
+def test_no_se_presta_un_libro_ya_prestado(client, libro_id, socio_id):
+    client.post(&quot;/prestamos&quot;, json={&quot;libro_id&quot;: libro_id, &quot;socio_id&quot;: socio_id})
+    r = client.post(&quot;/prestamos&quot;, json={&quot;libro_id&quot;: libro_id, &quot;socio_id&quot;: socio_id})
+    assert r.status_code == 409
+
+
+def test_devolver_libera_el_libro(client, libro_id, socio_id):
+    prestamo = client.post(&quot;/prestamos&quot;, json={&quot;libro_id&quot;: libro_id, &quot;socio_id&quot;: socio_id}).get_json()
+
+    r = client.post(f&quot;/prestamos/{prestamo[&#x27;id&#x27;]}/devolver&quot;)
+
+    assert r.status_code == 200
+    assert r.get_json()[&quot;fecha_devolucion&quot;] is not None
+    assert client.get(&quot;/libros?disponible=true&quot;).get_json()[&quot;items&quot;][0][&quot;id&quot;] == libro_id
+
+
+def test_devolver_dos_veces_da_409(client, libro_id, socio_id):
+    prestamo = client.post(&quot;/prestamos&quot;, json={&quot;libro_id&quot;: libro_id, &quot;socio_id&quot;: socio_id}).get_json()
+    client.post(f&quot;/prestamos/{prestamo[&#x27;id&#x27;]}/devolver&quot;)
+    assert client.post(f&quot;/prestamos/{prestamo[&#x27;id&#x27;]}/devolver&quot;).status_code == 409
+
+
+def test_socio_inexistente_no_cambia_el_libro(client, libro_id):
+    r = client.post(&quot;/prestamos&quot;, json={&quot;libro_id&quot;: libro_id, &quot;socio_id&quot;: 999})
+    assert r.status_code == 404
+    assert client.get(&quot;/libros?disponible=true&quot;).get_json()[&quot;items&quot;][0][&quot;id&quot;] == libro_id
+
+
+def test_email_repetido_da_409(client, socio_id):
+    r = client.post(&quot;/socios&quot;, json={&quot;nombre&quot;: &quot;Otra&quot;, &quot;email&quot;: &quot;ANA@mail.com&quot;})
+    assert r.status_code == 409</code></pre></figure>
+  <p>El test más interesante: simula que el servidor falla <b>justo después</b> de guardar el préstamo y comprueba que no quedó nada a medias. <code>monkeypatch</code> reemplaza una función solo durante el test.</p>
+  <figure class="codigo"><figcaption>tests/test_atomicidad.py</figcaption><pre><code class="language-python">from app.extensions import db
+from app.models import Prestamo
+from app.repositories import prestamos_repo
+
+
+def test_prestar_es_todo_o_nada(client, libro_id, socio_id, monkeypatch):
+    agregar_real = prestamos_repo.agregar
+
+    def agregar_y_fallar(prestamo):
+        agregar_real(prestamo)
+        raise RuntimeError(&quot;se cayó justo después de guardar el préstamo&quot;)
+
+    monkeypatch.setattr(prestamos_repo, &quot;agregar&quot;, agregar_y_fallar)
+    r = client.post(&quot;/prestamos&quot;, json={&quot;libro_id&quot;: libro_id, &quot;socio_id&quot;: socio_id})
+
+    assert r.status_code == 500
+    assert db.session.query(Prestamo).count() == 0   # no debe quedar préstamo huérfano</code></pre></figure>
+  <details><summary>Ver test_libros.py y test_autores.py</summary>
+    <figure class="codigo"><figcaption>tests/test_libros.py</figcaption><pre><code class="language-python">from datetime import date
+
+
+def test_crear_libro_disponible_por_defecto(client, autor_id):
+    r = client.post(&quot;/libros&quot;, json={&quot;titulo&quot;: &quot;Ficciones&quot;, &quot;autor_id&quot;: autor_id})
+    assert r.status_code == 201
+    assert r.get_json()[&quot;disponible&quot;] is True
+
+
+def test_autor_inexistente_da_404(client):
+    r = client.post(&quot;/libros&quot;, json={&quot;titulo&quot;: &quot;X&quot;, &quot;autor_id&quot;: 999})
+    assert r.status_code == 404
+
+
+def test_anio_futuro_da_422(client, autor_id):
+    r = client.post(&quot;/libros&quot;, json={&quot;titulo&quot;: &quot;X&quot;, &quot;autor_id&quot;: autor_id, &quot;anio&quot;: date.today().year + 1})
+    assert r.status_code == 422
+
+
+def test_patch_cambia_solo_lo_enviado(client, libro_id):
+    r = client.patch(f&quot;/libros/{libro_id}&quot;, json={&quot;disponible&quot;: False})
+    assert r.status_code == 200
+    assert r.get_json()[&quot;disponible&quot;] is False
+    assert r.get_json()[&quot;titulo&quot;] == &quot;Ficciones&quot;</code></pre></figure>
+    <figure class="codigo"><figcaption>tests/test_autores.py</figcaption><pre><code class="language-python">def test_crear_autor_sin_nombre_da_400(client):
+    r = client.post(&quot;/autores&quot;, json={&quot;pais&quot;: &quot;Chile&quot;})
+    assert r.status_code == 400
+
+
+def test_nombre_demasiado_largo_da_400(client):
+    r = client.post(&quot;/autores&quot;, json={&quot;nombre&quot;: &quot;a&quot; * 121})
+    assert r.status_code == 400
+
+
+def test_pagina_negativa_da_400(client):
+    assert client.get(&quot;/autores?pagina=-1&quot;).status_code == 400
+
+
+def test_no_borra_autor_con_libros(client, autor_id, libro_id):
+    assert client.delete(f&quot;/autores/{autor_id}&quot;).status_code == 409
+
+
+def test_borra_autor_sin_libros(client, autor_id):
+    assert client.delete(f&quot;/autores/{autor_id}&quot;).status_code == 204</code></pre></figure>
+  </details>
+  <div class="bloque"><pre><code class="language-bash">pytest -q                    # todo
+pytest tests/test_libros.py  # un archivo
+pytest -k prestar -v         # los que contienen "prestar" en el nombre</code></pre></div>
+</section>
+
+<section id="fl-tuyo">
+  <h2>Agrega tu propio recurso<a class="ancla" href="#fl-tuyo">#</a></h2>
+  <p>Receta para sumar un recurso nuevo (o empezar otro proyecto con la misma estructura). Ejemplo: <b>categorías</b> de libros.</p>
+  <ol class="pasos">
+    <li><b>Modelo</b> en <code>app/models/categoria.py</code> y regístralo en <code>app/models/__init__.py</code>.</li>
+    <li><b>Migración</b>: <code>flask --app wsgi db migrate -m "categorias"</code>, revisa el archivo y <code>db upgrade</code>.</li>
+    <li><b>Repositorio</b> con las consultas que necesites.</li>
+    <li><b>Servicio</b> con las reglas y <code>with transaccion():</code> al guardar.</li>
+    <li><b>Rutas</b> en un blueprint y regístralo en <code>create_app()</code>.</li>
+    <li><b>Tests</b>: una fixture en <code>conftest.py</code> y un <code>test_categorias.py</code>.</li>
+  </ol>
+  <div class="bloque"><pre><code class="language-python"># app/models/categoria.py
+from app.extensions import db
+
+
+class Categoria(db.Model):
+    __tablename__ = "categorias"
+
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(80), nullable=False, unique=True)
+
+    def to_dict(self):
+        return {"id": self.id, "nombre": self.nombre}</code></pre></div>
+  <div class="bloque"><pre><code class="language-python"># app/repositories/categorias_repo.py
+from sqlalchemy import select
+
+from app.extensions import db
+from app.models import Categoria
+
+
+def listar():
+    return db.session.scalars(select(Categoria).order_by(Categoria.nombre)).all()
+
+
+def por_nombre(nombre):
+    return db.session.scalar(select(Categoria).where(Categoria.nombre == nombre))
+
+
+def agregar(categoria):
+    db.session.add(categoria)</code></pre></div>
+  <div class="bloque"><pre><code class="language-python"># app/services/categorias_service.py
+from app.models import Categoria
+from app.repositories import categorias_repo
+
+from .excepciones import Conflicto
+from .transaccion import transaccion
+
+
+def listar():
+    return categorias_repo.listar()
+
+
+def crear(nombre):
+    if categorias_repo.por_nombre(nombre) is not None:
+        raise Conflicto("Ya existe esa categoría")
+    categoria = Categoria(nombre=nombre)
+    with transaccion():
+        categorias_repo.agregar(categoria)
+    return categoria</code></pre></div>
+  <div class="bloque"><pre><code class="language-python"># app/routes/categorias.py
+from flask import Blueprint
+
+from app.services import categorias_service
+
+from .validacion import leer_json, texto
+
+bp = Blueprint("categorias", __name__, url_prefix="/categorias")
+
+
+@bp.get("")
+def listar():
+    return {"items": [c.to_dict() for c in categorias_service.listar()]}
+
+
+@bp.post("")
+def crear():
+    datos = leer_json()
+    categoria = categorias_service.crear(nombre=texto(datos, "nombre", 80))
+    return categoria.to_dict(), 201</code></pre></div>
+  <div class="bloque"><pre><code class="language-python"># en app/__init__.py, dentro de create_app()
+from .routes.categorias import bp as categorias_bp
+app.register_blueprint(categorias_bp)
+
+# tests/test_categorias.py
+def test_crear_categoria(client):
+    r = client.post("/categorias", json={"nombre": "Cuento"})
+    assert r.status_code == 201
+
+
+def test_categoria_repetida_da_409(client):
+    client.post("/categorias", json={"nombre": "Cuento"})
+    assert client.post("/categorias", json={"nombre": "Cuento"}).status_code == 409</code></pre></div>
+</section>
+
+<section id="fl-fallos">
+  <h2>Errores comunes<a class="ancla" href="#fl-fallos">#</a></h2>
+  <details><summary>sqlalchemy.exc.ArgumentError: Expected string or URL object, got None</summary><p><code>DATABASE_URL</code> no está definida. Copia <code>.env.example</code> a <code>.env</code> y revisa que estés en la carpeta del proyecto.</p></details>
+  <details><summary>connection refused en el puerto 5432</summary><p>El contenedor de Postgres no está corriendo: <code>docker start pg-biblioteca</code>.</p></details>
+  <details><summary>relation "autores" does not exist</summary><p>Faltan las migraciones: <code>flask --app wsgi db upgrade</code>.</p></details>
+  <details><summary>Could not locate a Flask application</summary><p>Indica la app: <code>flask --app wsgi run</code>.</p></details>
+  <details><summary>ModuleNotFoundError: No module named 'app' al correr pytest</summary><p>Falta <code>pythonpath = .</code> en <code>pytest.ini</code>, o estás ejecutando pytest desde otra carpeta.</p></details>
+  <details><summary>Mi tabla nueva no aparece en la migración</summary><p>El modelo no está importado en <code>app/models/__init__.py</code>, así que Alembic no lo ve.</p></details>
+  <details><summary>Siempre recibo 400 "Se esperaba un objeto JSON"</summary><p>Falta la cabecera <code>Content-Type: application/json</code> en la petición.</p></details>
+</section>
+
+<!-- ============================== EXTRA ============================== -->
+<section id="unir">
+  <h2>Extra: conectar Angular con Flask<a class="ancla" href="#unir">#</a></h2>
+  <p>Los dos proyectos son independientes, pero el siguiente paso natural es que un frontend Angular consuma la API Flask. Necesitas dos cosas:</p>
+  <h3>1. Permitir CORS en Flask</h3>
+  <p>El navegador bloquea peticiones de <code>localhost:4200</code> a <code>localhost:5000</code> salvo que el servidor lo autorice.</p>
+  <div class="bloque"><pre><code class="language-bash">pip install flask-cors</code></pre></div>
+  <div class="bloque"><pre><code class="language-python"># app/__init__.py, dentro de create_app()
+from flask_cors import CORS
+CORS(app, origins=["http://localhost:4200"])</code></pre></div>
+  <h3>2. Un servicio Angular para la API</h3>
+  <div class="bloque"><pre><code class="language-typescript">// libros/biblioteca.service.ts
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { Observable, map } from 'rxjs';
+
+export interface LibroApi {
+  id: number;
+  titulo: string;
+  anio: number | null;
+  disponible: boolean;
+  autor_id: number;
+}
+
+@Injectable({ providedIn: 'root' })
+export class BibliotecaService {
+  private readonly http = inject(HttpClient);
+  private readonly api = 'http://127.0.0.1:5000';
+
+  libros(disponible?: boolean): Observable&lt;LibroApi[]&gt; {
+    let params = new HttpParams();
+    if (disponible !== undefined) params = params.set('disponible', disponible);
+    return this.http
+      .get&lt;{ items: LibroApi[] }&gt;(`${this.api}/libros`, { params })
+      .pipe(map((r) =&gt; r.items));
+  }
+
+  prestar(libroId: number, socioId: number) {
+    return this.http.post(`${this.api}/prestamos`, { libro_id: libroId, socio_id: socioId });
+  }
+}</code></pre></div>
+  <p>Y para mostrar el mensaje que manda Flask cuando algo falla (por ejemplo 409 "El libro ya está prestado"):</p>
+  <div class="bloque"><pre><code class="language-typescript">import { HttpErrorResponse } from '@angular/common/http';
+
+this.biblioteca.prestar(1, 1).subscribe({
+  next: () =&gt; this.mensaje.set('Préstamo registrado'),
+  error: (e: HttpErrorResponse) =&gt; this.mensaje.set(e.error?.error ?? 'Error inesperado'),
+});</code></pre></div>
+</section>
+
+<section id="glosario">
+  <h2>Glosario<a class="ancla" href="#glosario">#</a></h2>
+  <table>
+    <tr><th>Término</th><th>Qué significa</th></tr>
+    <tr><td>API REST</td><td>Servidor que expone recursos (libros, autores) en URLs y se usa con métodos HTTP (GET, POST, PATCH, DELETE).</td></tr>
+    <tr><td>Componente</td><td>Pieza de interfaz en Angular: clase + plantilla + estilos.</td></tr>
+    <tr><td>Standalone</td><td>Componente que declara sus propias dependencias, sin NgModule.</td></tr>
+    <tr><td>Signal</td><td>Valor reactivo de Angular; avisa a la vista cuando cambia.</td></tr>
+    <tr><td>Observable</td><td>Flujo de valores en el tiempo (RxJS). No hace nada hasta que alguien se suscribe.</td></tr>
+    <tr><td>Operador</td><td>Función que transforma un Observable (<code>map</code>, <code>filter</code>, <code>switchMap</code>…).</td></tr>
+    <tr><td>Debounce</td><td>Esperar a que pare la actividad antes de actuar.</td></tr>
+    <tr><td>Inyección de dependencias</td><td>El framework te entrega los objetos que necesitas (<code>inject()</code>) en lugar de crearlos tú.</td></tr>
+    <tr><td>Blueprint</td><td>Grupo de rutas de Flask con un prefijo común.</td></tr>
+    <tr><td>App factory</td><td>Función que crea y configura la app (<code>create_app</code>).</td></tr>
+    <tr><td>ORM</td><td>Biblioteca (SQLAlchemy) que mapea tablas a clases Python.</td></tr>
+    <tr><td>Migración</td><td>Archivo versionado que cambia el esquema de la base de datos.</td></tr>
+    <tr><td>Transacción</td><td>Grupo de cambios que se guarda entero o no se guarda (commit / rollback).</td></tr>
+    <tr><td>FOR UPDATE</td><td>Bloqueo de filas en una consulta para evitar que dos procesos las cambien a la vez.</td></tr>
+    <tr><td>Fixture</td><td>Preparación reutilizable para tests en pytest.</td></tr>
+    <tr><td>Mock / doble de prueba</td><td>Reemplazo falso de algo real (HTTP, una función) durante un test.</td></tr>
+    <tr><td>CORS</td><td>Regla del navegador: un sitio solo puede llamar a otra dirección si esta lo permite.</td></tr>
+  </table>
+</section>
+
+<footer>
+  Guía de estudio basada en los proyectos <code>angular-buscador</code> y <code>flask-biblioteca</code>. El código de "Código completo" se genera directamente desde los proyectos.
+</footer>
+
+</div>
+</main>
+</div>
+
+<button class="boton-icono subir" id="subir" aria-label="Volver arriba">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/ini.min.js"></script>
+<script>
+(function () {
+  // Resaltado de sintaxis
+  if (window.hljs) document.querySelectorAll('pre code').forEach(function (el) { hljs.highlightElement(el); });
+
+  // Botón copiar en cada bloque
+  document.querySelectorAll('pre').forEach(function (pre) {
+    var boton = document.createElement('button');
+    boton.className = 'copiar';
+    boton.type = 'button';
+    boton.textContent = 'Copiar';
+    boton.addEventListener('click', function () {
+      var texto = pre.innerText;
+      var listo = function () {
+        boton.textContent = 'Copiado';
+        boton.classList.add('ok');
+        setTimeout(function () { boton.textContent = 'Copiar'; boton.classList.remove('ok'); }, 1500);
+      };
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(texto).then(listo);
+      } else {
+        var area = document.createElement('textarea');
+        area.value = texto; document.body.appendChild(area); area.select();
+        document.execCommand('copy'); area.remove(); listo();
+      }
+    });
+    var contenedor = pre.closest('figure, .bloque') || pre;
+    contenedor.appendChild(boton);
+  });
+
+  // Tema claro / oscuro
+  var raiz = document.documentElement;
+  var claro = document.getElementById('hl-claro');
+  var oscuro = document.getElementById('hl-oscuro');
+  function aplicar(tema) {
+    raiz.setAttribute('data-theme', tema);
+    claro.disabled = tema === 'dark';
+    oscuro.disabled = tema !== 'dark';
+  }
+  var guardado = null;
+  try { guardado = localStorage.getItem('tema'); } catch (e) {}
+  aplicar(guardado || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  document.getElementById('tema').addEventListener('click', function () {
+    var nuevo = raiz.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    aplicar(nuevo);
+    try { localStorage.setItem('tema', nuevo); } catch (e) {}
+  });
+
+  // Menú en móvil
+  var menu = document.getElementById('menu');
+  document.getElementById('abrir-menu').addEventListener('click', function () { menu.classList.toggle('abierto'); });
+  menu.addEventListener('click', function (e) { if (e.target.tagName === 'A') menu.classList.remove('abierto'); });
+
+  // Filtro del índice
+  document.getElementById('filtro').addEventListener('input', function () {
+    var q = this.value.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    menu.querySelectorAll('li').forEach(function (li) {
+      var t = li.textContent.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+      li.style.display = t.indexOf(q) === -1 ? 'none' : '';
+    });
+  });
+
+  // Marcar en el índice la sección visible
+  var enlaces = {};
+  menu.querySelectorAll('a[href^="#"]').forEach(function (a) { enlaces[a.getAttribute('href').slice(1)] = a; });
+  var observador = new IntersectionObserver(function (entradas) {
+    entradas.forEach(function (en) {
+      if (en.isIntersecting && enlaces[en.target.id]) {
+        menu.querySelectorAll('a.activo').forEach(function (a) { a.classList.remove('activo'); });
+        enlaces[en.target.id].classList.add('activo');
+      }
+    });
+  }, { rootMargin: '-80px 0px -70% 0px' });
+  document.querySelectorAll('section[id], .parte[id]').forEach(function (s) { observador.observe(s); });
+
+  // Volver arriba
+  var subir = document.getElementById('subir');
+  addEventListener('scroll', function () { subir.classList.toggle('visible', scrollY > 800); }, { passive: true });
+  subir.addEventListener('click', function () { scrollTo({ top: 0 }); });
+})();
+</script>
+</body>
+</html>
