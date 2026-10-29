@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Angular y Flask — Guía práctica</title>
-<meta name="description" content="Guía práctica en español: un buscador con Angular (signals + RxJS) y una API REST con Flask en 3 capas (PostgreSQL, SQLAlchemy, Alembic, pytest). Conceptos, código para copiar y plantillas.">
+<title>Guía Dev — Angular, Flask, arquitectura e IA</title>
+<meta name="description" content="Guía práctica en español: Angular (signals, RxJS, headers, interceptors, guards, promesas), API REST con Flask en 3 capas, arquitecturas (capas, monolito, monolito modular, hexagonal, microservicios) y desarrollo con IA (prompts, skills, agentes, orquestadores, MCP, SDD, DDD, ODD, Claude Code y Gemini CLI).">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -27,6 +27,8 @@
   --ojo: #fdecec;
   --ojo-borde: #e48a8a;
   --codigo-fondo: #f6f8fa;
+  --arq: #6d3bd8;
+  --ia: #b05500;
   --ancho-menu: 280px;
 }
 :root[data-theme="dark"] {
@@ -44,6 +46,8 @@
   --ojo: #2d1818;
   --ojo-borde: #8a3a3a;
   --codigo-fondo: #0d1117;
+  --arq: #b39bff;
+  --ia: #ffb35c;
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 72px; }
@@ -173,6 +177,30 @@ details { border: 1px solid var(--borde); border-radius: 10px; padding: 10px 16p
 details summary { cursor: pointer; font-weight: 600; }
 details[open] summary { margin-bottom: 8px; }
 
+/* Partes 3 y 4 */
+.menu h4.arq, .parte.arq .etiqueta { color: var(--arq); }
+.menu h4.ia, .parte.ia .etiqueta { color: var(--ia); }
+.chip.arq { background: color-mix(in srgb, var(--arq) 14%, transparent); color: var(--arq); }
+.chip.ia { background: color-mix(in srgb, var(--ia) 14%, transparent); color: var(--ia); }
+div.tarjeta:hover { border-color: var(--borde); }
+.diagrama .caja.h { stroke: var(--arq); }
+.diagrama .caja.i { stroke: var(--ia); }
+.diagrama .zona { fill: color-mix(in srgb, var(--acento) 5%, transparent); stroke: var(--texto-2); stroke-width: 1.2; stroke-dasharray: 6 5; }
+.diagrama .nucleo { fill: color-mix(in srgb, var(--arq) 12%, var(--fondo)); stroke: var(--arq); stroke-width: 1.5; }
+.diagrama .anillo { fill: var(--fondo); stroke: var(--arq); stroke-width: 1.5; }
+.diagrama .linea { stroke: var(--texto-2); stroke-width: 1.5; fill: none; }
+.diagrama .punto { fill: var(--acento); }
+.diagrama .flecha.punteada { stroke-dasharray: 5 4; }
+.diagrama text.chico { fill: var(--texto-2); font-size: 11.5px; font-weight: 500; }
+.dos { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.dos > * { min-width: 0; }
+.pro-contra { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0 20px; }
+.pro-contra > div { padding: 12px 16px; border-radius: 10px; border: 1px solid var(--borde); font-size: 15px; }
+.pro-contra b { display: block; margin-bottom: 4px; }
+.pro-contra ul { margin: 0; padding-left: 18px; }
+.pro-contra .si b { color: var(--flask); }
+.pro-contra .no b { color: var(--angular); }
+
 footer { border-top: 1px solid var(--borde); margin-top: 64px; padding-top: 20px; color: var(--texto-2); font-size: 14px; }
 .subir { position: fixed; right: 18px; bottom: 18px; opacity: 0; pointer-events: none; transition: opacity .2s; }
 .subir.visible { opacity: 1; pointer-events: auto; }
@@ -187,6 +215,7 @@ footer { border-top: 1px solid var(--borde); margin-top: 64px; padding-top: 20px
   }
   .menu.abierto { transform: none; box-shadow: 0 10px 30px rgba(0,0,0,.15); }
   main { padding: 24px 16px 80px; }
+  .dos, .pro-contra { grid-template-columns: 1fr; }
   h1 { font-size: 1.9rem; }
   .parte { padding: 20px; }
 }
@@ -200,13 +229,14 @@ footer { border-top: 1px solid var(--borde); margin-top: 64px; padding-top: 20px
   </button>
   <a class="marca" href="#inicio">
     <svg viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#2f5bea"/><path d="M9 11l-4 5 4 5M23 11l4 5-4 5M18 9l-4 14" stroke="white" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    Angular y Flask
+    Guía Dev
   </a>
   <span class="espacio"></span>
   <nav>
     <a href="#angular">Angular</a>
     <a href="#flask">Flask</a>
-    <a href="#unir">Unirlos</a>
+    <a href="#arquitectura">Arquitectura</a>
+    <a href="#ia">IA</a>
     <a href="#glosario">Glosario</a>
   </nav>
   <button class="boton-icono" id="tema" aria-label="Cambiar tema claro u oscuro">
@@ -240,6 +270,14 @@ footer { border-top: 1px solid var(--borde); margin-top: 64px; padding-top: 20px
     <li><a href="#ng-tuyo">Haz el tuyo (plantilla)</a></li>
     <li><a href="#ng-errores">Errores comunes</a></li>
   </ul>
+  <h4 class="angular">Angular · Más allá</h4>
+  <ul>
+    <li><a href="#ng-mas">Qué agrega esta parte</a></li>
+    <li><a href="#ng-headers">Headers en las peticiones</a></li>
+    <li><a href="#ng-interceptors">Interceptors</a></li>
+    <li><a href="#ng-guards">Guards (router)</a></li>
+    <li><a href="#ng-promesas">Observables vs. promesas</a></li>
+  </ul>
   <h4 class="flask">Flask · Biblioteca</h4>
   <ul>
     <li><a href="#flask">Qué vamos a construir</a></li>
@@ -254,6 +292,7 @@ footer { border-top: 1px solid var(--borde); margin-top: 64px; padding-top: 20px
     <li><a href="#fl-servicios">Servicios</a></li>
     <li><a href="#fl-repos">Repositorios</a></li>
     <li><a href="#fl-errores">Errores → códigos HTTP</a></li>
+    <li><a href="#fl-headers">Headers y rutas protegidas</a></li>
     <li><a href="#fl-transacciones">Transacciones y bloqueos</a></li>
     <li><a href="#fl-endpoints">Endpoints y curl</a></li>
     <li><a href="#fl-tests">Tests con pytest</a></li>
@@ -263,6 +302,38 @@ footer { border-top: 1px solid var(--borde); margin-top: 64px; padding-top: 20px
   <h4>Extra</h4>
   <ul>
     <li><a href="#unir">Conectar Angular con Flask</a></li>
+  </ul>
+  <h4 class="arq">Arquitectura</h4>
+  <ul>
+    <li><a href="#arquitectura">Dos preguntas distintas</a></li>
+    <li><a href="#arq-capas">En capas</a></li>
+    <li><a href="#arq-monolito">Monolito</a></li>
+    <li><a href="#arq-modular">Monolito modular</a></li>
+    <li><a href="#arq-hexagonal">Hexagonal (puertos y adaptadores)</a></li>
+    <li><a href="#arq-limpia">Limpia y cebolla</a></li>
+    <li><a href="#arq-servicios">Servicios y microservicios</a></li>
+    <li><a href="#arq-otras">MVC, eventos, CQRS, serverless</a></li>
+    <li><a href="#arq-frontend">Arquitectura en Angular</a></li>
+    <li><a href="#arq-elegir">Cuál elegir</a></li>
+  </ul>
+  <h4 class="ia">IA para desarrollar</h4>
+  <ul>
+    <li><a href="#ia">Mapa de conceptos</a></li>
+    <li><a href="#ia-prompt">Prompt</a></li>
+    <li><a href="#ia-skill">Skill y comandos</a></li>
+    <li><a href="#ia-agentes">Agentes, subagentes y orquestador</a></li>
+    <li><a href="#ia-mcp">MCP: conectar herramientas</a></li>
+    <li><a href="#ia-dd">La familia *DD</a></li>
+    <li><a href="#ia-sdd">SDD: Spec-Driven</a></li>
+    <li><a href="#ia-ddd">DDD: Domain-Driven</a></li>
+    <li><a href="#ia-odd">ODD: Observability-Driven</a></li>
+    <li><a href="#ia-claude">Configurar Claude Code</a></li>
+    <li><a href="#ia-gemini">Configurar Gemini CLI</a></li>
+    <li><a href="#ia-comparar">Claude, Gemini, Codex: AGENTS.md</a></li>
+    <li><a href="#ia-flujo">Flujo de trabajo recomendado</a></li>
+  </ul>
+  <h4>Referencia</h4>
+  <ul>
     <li><a href="#glosario">Glosario</a></li>
   </ul>
 </aside>
@@ -272,8 +343,8 @@ footer { border-top: 1px solid var(--borde); margin-top: 64px; padding-top: 20px
 
 <!-- ============================== INICIO ============================== -->
 <section id="inicio">
-  <h1>Angular y Flask, paso a paso</h1>
-  <p class="lead">Dos proyectos pequeños pero completos, explicados concepto por concepto: un <b>buscador de libros con Angular</b> y una <b>API de biblioteca con Flask</b>. Todo el código se puede copiar y reutilizar.</p>
+  <h1>Angular, Flask, arquitectura e IA</h1>
+  <p class="lead">Dos proyectos pequeños pero completos, explicados concepto por concepto: un <b>buscador de libros con Angular</b> y una <b>API de biblioteca con Flask</b>. Después, cómo organizar proyectos más grandes y cómo trabajar con IA en la terminal. Todo el código se puede copiar y reutilizar.</p>
 
   <div class="tarjetas">
     <a class="tarjeta" href="#angular">
@@ -285,6 +356,16 @@ footer { border-top: 1px solid var(--borde); margin-top: 64px; padding-top: 20px
       <span class="chip flask">Backend</span>
       <b>API de biblioteca</b>
       <span>Flask 3, PostgreSQL, SQLAlchemy 2, Alembic y pytest. Autores, libros, socios y préstamos en 3 capas.</span>
+    </a>
+    <a class="tarjeta" href="#arquitectura">
+      <span class="chip arq">Diseño</span>
+      <b>Arquitecturas</b>
+      <span>Capas, monolito, monolito modular, hexagonal, limpia y microservicios, con diagramas y cuándo usar cada una.</span>
+    </a>
+    <a class="tarjeta" href="#ia">
+      <span class="chip ia">IA</span>
+      <b>Desarrollar con IA</b>
+      <span>Prompt, skill, agente, orquestador, MCP, SDD, DDD y ODD. Cómo configurar Claude Code y Gemini CLI.</span>
     </a>
   </div>
 
@@ -306,6 +387,7 @@ footer { border-top: 1px solid var(--borde); margin-top: 64px; padding-top: 20px
     <tr><td>Python 3.12+</td><td>Ejecutar Flask</td><td><code>python3 --version</code></td></tr>
     <tr><td>Docker</td><td>Levantar PostgreSQL sin instalarlo</td><td><code>docker -v</code></td></tr>
     <tr><td>Un editor</td><td>VS Code recomendado</td><td>—</td></tr>
+    <tr><td>Claude Code o Gemini CLI</td><td>Opcional: la parte de IA</td><td><code>claude --version</code> · <code>gemini --version</code></td></tr>
   </table>
 </section>
 
@@ -689,6 +771,489 @@ export class BuscadorPaises {
   <details><summary>En la plantilla sale "[object Object]" o la función entera</summary><p>Olvidaste los paréntesis al leer el signal: es <code>{{ total() }}</code>, no <code>{{ total }}</code>.</p></details>
 </section>
 
+<!-- ============================== ANGULAR AVANZADO ============================== -->
+<div class="parte angular" id="ng-mas">
+  <span class="etiqueta">Parte 1 · Angular, más allá del buscador</span>
+  <h1>Headers, interceptors, guards y promesas</h1>
+  <p>El buscador no los necesita, pero en cuanto tu app tiene <b>login</b> aparecen los cuatro: el token viaja en un <b>header</b>, un <b>interceptor</b> lo pega en cada petición, un <b>guard</b> impide entrar a pantallas sin sesión y, a veces, prefieres <b>async/await</b> en vez de Observables. Los ejemplos usan la API Flask de la Parte 2.</p>
+</div>
+
+<section id="ng-headers">
+  <h2>Headers en las peticiones<a class="ancla" href="#ng-headers">#</a></h2>
+  <p>Un <b>header</b> (cabecera) es un dato extra que viaja con la petición o la respuesta, con forma <code>Nombre: valor</code>. No es parte del cuerpo (el JSON): es la "etiqueta del sobre". Sirven para decir quién eres, qué formato mandas y qué formato aceptas.</p>
+  <table>
+    <tr><th>Header</th><th>Va en…</th><th>Para qué</th></tr>
+    <tr><td><code>Content-Type</code></td><td>petición y respuesta</td><td>Formato del cuerpo: <code>application/json</code>, <code>multipart/form-data</code></td></tr>
+    <tr><td><code>Accept</code></td><td>petición</td><td>Qué formato quieres recibir</td></tr>
+    <tr><td><code>Authorization</code></td><td>petición</td><td>Quién eres: <code>Bearer eyJhbGci…</code></td></tr>
+    <tr><td><code>Accept-Language</code></td><td>petición</td><td>Idioma preferido (<code>es</code>) para mensajes del servidor</td></tr>
+    <tr><td><code>X-Request-Id</code></td><td>ambos</td><td>Un id para seguir una petición en los logs (inventado, por eso <code>X-</code>)</td></tr>
+    <tr><td><code>X-Total-Count</code></td><td>respuesta</td><td>Total de resultados cuando paginas</td></tr>
+    <tr><td><code>Location</code></td><td>respuesta</td><td>URL del recurso recién creado (con 201)</td></tr>
+    <tr><td><code>Set-Cookie</code></td><td>respuesta</td><td>El servidor guarda una cookie en el navegador</td></tr>
+  </table>
+
+  <h3>Mandar headers en una petición</h3>
+  <div class="bloque"><pre><code class="language-typescript">import { HttpClient, HttpHeaders } from '@angular/common/http';
+
+// Opción 1: objeto HttpHeaders
+const headers = new HttpHeaders()
+  .set('Accept', 'application/json')
+  .set('X-Request-Id', crypto.randomUUID());
+this.http.get&lt;LibroApi[]&gt;(`${API_URL}/libros`, { headers });
+
+// Opción 2: objeto simple (más corto)
+this.http.get&lt;LibroApi[]&gt;(`${API_URL}/libros`, { headers: { 'Accept-Language': 'es' } });
+
+// POST: HttpClient pone Content-Type: application/json solo porque el body es un objeto
+this.http.post(`${API_URL}/prestamos`, { libro_id: 1, socio_id: 1 });</code></pre></div>
+  <div class="ojo"><strong>HttpHeaders es inmutable</strong><code>headers.set(...)</code> <b>no cambia</b> el objeto: devuelve uno nuevo. <code>h.set('A', '1');</code> sola no hace nada; tienes que guardar el resultado: <code>h = h.set('A', '1')</code>. Lo mismo pasa con <code>HttpParams</code> y con la petición dentro de un interceptor (por eso se usa <code>req.clone()</code>).</div>
+  <div class="nota"><strong>Subir archivos</strong>Con <code>FormData</code> <b>no</b> pongas <code>Content-Type</code> a mano: el navegador lo arma con el <i>boundary</i> correcto. Si lo fuerzas, el servidor no puede leer el archivo.</div>
+
+  <h3>Leer headers de la respuesta</h3>
+  <p>Por defecto HttpClient te da solo el cuerpo. Con <code>observe: 'response'</code> recibes la respuesta completa: estado, headers y cuerpo.</p>
+  <div class="bloque"><pre><code class="language-typescript">this.http
+  .get&lt;LibroApi[]&gt;(`${API_URL}/libros`, { observe: 'response' })
+  .subscribe((res) =&gt; {
+    const total = Number(res.headers.get('X-Total-Count'));  // header de la respuesta
+    const libros = res.body ?? [];                             // el JSON
+    console.log(res.status, total, libros.length);
+  });</code></pre></div>
+
+  <h3>Headers + CORS: por qué a veces "desaparecen"</h3>
+  <p>Cuando Angular (<code>localhost:4200</code>) llama a Flask (<code>localhost:5000</code>) con un header "no simple" como <code>Authorization</code>, el navegador primero manda una petición <b>OPTIONS</b> de prueba (<i>preflight</i>) para preguntar si está permitido. Y al revés: aunque Flask mande <code>X-Total-Count</code>, JavaScript no puede leerlo salvo que el servidor lo <b>exponga</b>.</p>
+  <div class="diagrama">
+    <svg viewBox="0 0 760 290" role="img" aria-label="Diagrama de secuencia: el navegador manda OPTIONS preflight, Flask responde con Access-Control-Allow-Headers, luego va el GET con Authorization y Flask responde con X-Total-Count y Access-Control-Expose-Headers">
+      <rect class="caja a" x="60" y="10" width="180" height="44" rx="10"/><text x="150" y="37" text-anchor="middle">Navegador (Angular)</text>
+      <rect class="caja f" x="520" y="10" width="180" height="44" rx="10"/><text x="610" y="37" text-anchor="middle">Flask (API)</text>
+      <path class="linea" d="M150 54V280" style="stroke-dasharray:4 4"/><path class="linea" d="M610 54V280" style="stroke-dasharray:4 4"/>
+      <text class="sub" x="380" y="82" text-anchor="middle">1. OPTIONS /libros  (¿puedo mandar Authorization?)</text>
+      <path class="flecha" d="M152 92H606"/>
+      <text class="sub" x="380" y="128" text-anchor="middle">2. 204 · Access-Control-Allow-Headers: Authorization</text>
+      <path class="flecha" d="M608 138H154"/>
+      <text class="sub" x="380" y="184" text-anchor="middle">3. GET /libros · Authorization: Bearer eyJ…</text>
+      <path class="flecha" d="M152 194H606"/>
+      <text class="sub" x="380" y="232" text-anchor="middle">4. 200 · X-Total-Count: 42 · Access-Control-Expose-Headers: X-Total-Count</text>
+      <path class="flecha" d="M608 242H154"/>
+      <text class="chico" x="380" y="272" text-anchor="middle">Los pasos 1 y 2 los hace el navegador solo; tú no escribes nada en Angular</text>
+    </svg>
+  </div>
+  <p>En Flask se resuelve en la configuración de CORS:</p>
+  <div class="bloque"><pre><code class="language-python">CORS(
+    app,
+    origins=["http://localhost:4200"],
+    allow_headers=["Content-Type", "Authorization", "X-Request-Id"],  # headers que Angular puede MANDAR
+    expose_headers=["X-Total-Count", "X-Request-Id"],                 # headers que Angular puede LEER
+)</code></pre></div>
+  <div class="idea"><strong>Regla práctica</strong>Si el mismo header se repite en varios servicios (token, idioma, request-id), no lo pongas en cada llamada: va en un <a href="#ng-interceptors">interceptor</a>.</div>
+  <details><summary>¿Token en un header o en una cookie?</summary>
+    <p><b>Header <code>Authorization: Bearer</code></b>: simple, ideal para APIs y apps móviles. El token vive en JavaScript (localStorage o memoria), así que un ataque XSS podría leerlo.</p>
+    <p><b>Cookie <code>HttpOnly</code></b>: JavaScript no puede leerla, el navegador la manda sola. En Angular necesitas <code>withCredentials: true</code> y en Flask <code>CORS(..., supports_credentials=True)</code> con un origen concreto (no <code>*</code>). Hay que protegerse de CSRF.</p>
+    <p>Para aprender y para APIs propias, Bearer está bien. Esta guía usa Bearer.</p>
+  </details>
+</section>
+
+<section id="ng-interceptors">
+  <h2>Interceptors: código que corre en cada petición<a class="ancla" href="#ng-interceptors">#</a></h2>
+  <p>Un <b>interceptor</b> es una función por la que pasa <b>toda</b> petición de <code>HttpClient</code> antes de salir, y toda respuesta antes de volver a tu servicio. Es el lugar para lo que se repite: poner el token, mostrar un spinner global, manejar el 401, reintentar.</p>
+  <div class="diagrama">
+    <svg viewBox="0 0 760 200" role="img" aria-label="La petición pasa por authInterceptor, cargaInterceptor y errorInterceptor en ese orden hasta la API; la respuesta vuelve por los mismos interceptors en orden inverso">
+      <text class="sub" x="380" y="18" text-anchor="middle">petición: los interceptors corren en el orden del arreglo →</text>
+      <rect class="caja" x="10" y="30" width="130" height="130" rx="10"/><text x="75" y="92" text-anchor="middle">Servicio</text><text class="sub" x="75" y="110" text-anchor="middle">http.get()</text>
+      <rect class="caja a" x="180" y="30" width="130" height="130" rx="10"/><text x="245" y="92" text-anchor="middle">auth</text><text class="sub" x="245" y="110" text-anchor="middle">pone el token</text>
+      <rect class="caja a" x="340" y="30" width="130" height="130" rx="10"/><text x="405" y="92" text-anchor="middle">carga</text><text class="sub" x="405" y="110" text-anchor="middle">spinner on / off</text>
+      <rect class="caja a" x="500" y="30" width="130" height="130" rx="10"/><text x="565" y="92" text-anchor="middle">error</text><text class="sub" x="565" y="110" text-anchor="middle">401 → /login</text>
+      <rect class="caja f" x="660" y="30" width="90" height="130" rx="10"/><text x="705" y="92" text-anchor="middle">API</text><text class="sub" x="705" y="110" text-anchor="middle">Flask</text>
+      <path class="flecha" d="M140 52H178"/><path class="flecha" d="M310 52H338"/><path class="flecha" d="M470 52H498"/><path class="flecha" d="M630 52H658"/>
+      <path class="flecha" d="M660 140H632"/><path class="flecha" d="M500 140H472"/><path class="flecha" d="M340 140H312"/><path class="flecha" d="M180 140H142"/>
+      <text class="sub" x="380" y="186" text-anchor="middle">← respuesta: vuelve por los mismos interceptors en orden inverso</text>
+    </svg>
+  </div>
+
+  <h3>0. La pieza común: un servicio de sesión</h3>
+  <p>Interceptors y guards necesitan saber si hay sesión. Lo guardamos en signals, igual que el estado del buscador:</p>
+  <div class="bloque"><pre><code class="language-typescript">// core/api.ts
+export const API_URL = 'http://127.0.0.1:5000';
+
+// core/auth.service.ts
+import { HttpClient } from '@angular/common/http';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { tap } from 'rxjs';
+import { API_URL } from './api';
+
+export interface Usuario { id: number; nombre: string; roles: string[]; }
+
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  private readonly http = inject(HttpClient);
+
+  readonly token = signal&lt;string | null&gt;(localStorage.getItem('token'));
+  readonly usuario = signal&lt;Usuario | null&gt;(null);
+  readonly logueado = computed(() =&gt; this.token() !== null);
+
+  login(email: string, clave: string) {
+    return this.http
+      .post&lt;{ token: string; usuario: Usuario }&gt;(`${API_URL}/auth/login`, { email, clave })
+      .pipe(
+        tap((r) =&gt; {
+          localStorage.setItem('token', r.token);
+          this.token.set(r.token);
+          this.usuario.set(r.usuario);
+        }),
+      );
+  }
+
+  cerrarSesion() {
+    localStorage.removeItem('token');
+    this.token.set(null);
+    this.usuario.set(null);
+  }
+}</code></pre></div>
+
+  <h3>1. authInterceptor: poner el token</h3>
+  <div class="bloque"><pre><code class="language-typescript">// core/auth.interceptor.ts
+import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { API_URL } from './api';
+import { AuthService } from './auth.service';
+
+export const authInterceptor: HttpInterceptorFn = (req, next) =&gt; {
+  const token = inject(AuthService).token();
+  const esMiApi = req.url.startsWith(API_URL);
+
+  if (!token || !esMiApi) return next(req);            // sin token o API ajena: pasa tal cual
+
+  const conToken = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
+  return next(conToken);                                // la petición es inmutable: se clona
+};</code></pre></div>
+  <ul>
+    <li><code>next(req)</code> pasa la petición al siguiente interceptor (o al servidor si es el último). Devuelve un Observable con la respuesta.</li>
+    <li><code>esMiApi</code> evita mandarle tu token a Open Library o a cualquier API de terceros.</li>
+    <li><code>inject()</code> funciona dentro del interceptor porque Angular lo ejecuta en un contexto de inyección.</li>
+  </ul>
+
+  <h3>2. cargaInterceptor: un spinner para toda la app</h3>
+  <div class="bloque"><pre><code class="language-typescript">// core/carga.ts
+import { HttpContextToken, HttpInterceptorFn } from '@angular/common/http';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { finalize } from 'rxjs';
+
+@Injectable({ providedIn: 'root' })
+export class CargaService {
+  private readonly pendientes = signal(0);                 // cuántas peticiones van en camino
+  readonly activa = computed(() =&gt; this.pendientes() &gt; 0);
+  empezar() { this.pendientes.update((n) =&gt; n + 1); }
+  terminar() { this.pendientes.update((n) =&gt; n - 1); }
+}
+
+export const SIN_CARGA = new HttpContextToken&lt;boolean&gt;(() =&gt; false);  // "bandera" opcional por petición
+
+export const cargaInterceptor: HttpInterceptorFn = (req, next) =&gt; {
+  if (req.context.get(SIN_CARGA)) return next(req);       // esta petición no muestra spinner
+  const carga = inject(CargaService);
+  carga.empezar();
+  return next(req).pipe(finalize(() =&gt; carga.terminar())); // finalize: con éxito, error o cancelación
+};</code></pre></div>
+  <div class="bloque"><pre><code class="language-html">&lt;!-- app.html --&gt;
+@if (carga.activa()) { &lt;div class="barra-carga" role="progressbar"&gt;&lt;/div&gt; }
+&lt;router-outlet /&gt;</code></pre></div>
+  <p>El buscador no debería prender el spinner global en cada tecla. Para saltarse el interceptor se usa el <b>HttpContext</b>:</p>
+  <div class="bloque"><pre><code class="language-typescript">this.http.get(url, { params, context: new HttpContext().set(SIN_CARGA, true) });</code></pre></div>
+
+  <h3>3. errorInterceptor: 401 y reintentos</h3>
+  <div class="bloque"><pre><code class="language-typescript">// core/error.interceptor.ts
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { catchError, retry, throwError, timer } from 'rxjs';
+import { AuthService } from './auth.service';
+
+export const errorInterceptor: HttpInterceptorFn = (req, next) =&gt; {
+  const router = inject(Router);
+  const auth = inject(AuthService);
+
+  return next(req).pipe(
+    // Reintenta 2 veces solo los GET y solo si es falla de red (0) o del servidor (5xx)
+    retry({
+      count: req.method === 'GET' ? 2 : 0,
+      delay: (err: HttpErrorResponse) =&gt;
+        err.status === 0 || err.status &gt;= 500 ? timer(500) : throwError(() =&gt; err),
+    }),
+    catchError((err: HttpErrorResponse) =&gt; {
+      if (err.status === 401) {                           // token vencido o inválido
+        auth.cerrarSesion();
+        router.navigate(['/login'], { queryParams: { volver: router.url } });
+      }
+      return throwError(() =&gt; err);                       // el componente igual recibe el error
+    }),
+  );
+};</code></pre></div>
+  <div class="ojo"><strong>No reintentes un POST</strong>Si el servidor guardó el préstamo pero la respuesta se perdió, reintentar crea un segundo préstamo. Reintenta solo operaciones que se pueden repetir sin efecto (GET, y PUT/DELETE si tu API lo garantiza).</div>
+
+  <h3>4. Registrarlos</h3>
+  <div class="bloque"><pre><code class="language-typescript">// app.config.ts
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    provideRouter(routes, withComponentInputBinding()),
+    provideHttpClient(
+      withFetch(),                                                     // opcional: usa fetch por dentro
+      withInterceptors([authInterceptor, cargaInterceptor, errorInterceptor]),
+    ),
+  ],
+};</code></pre></div>
+  <table>
+    <tr><th>Sí va en un interceptor</th><th>No va en un interceptor</th></tr>
+    <tr><td>Token, idioma, <code>X-Request-Id</code></td><td>Convertir la respuesta de un endpoint concreto (eso es del servicio)</td></tr>
+    <tr><td>Spinner global, medir tiempos, logs</td><td>Mensajes de error de una sola pantalla</td></tr>
+    <tr><td>401 → login, reintentos de red</td><td>Lógica de negocio ("si el libro está prestado…")</td></tr>
+    <tr><td>Caché simple de GET</td><td>Peticiones que no son de HttpClient (<code>fetch</code> directo no pasa por aquí)</td></tr>
+  </table>
+
+  <h3>Probar un interceptor</h3>
+  <div class="bloque"><pre><code class="language-typescript">beforeEach(() =&gt; {
+  TestBed.configureTestingModule({
+    providers: [
+      provideHttpClient(withInterceptors([authInterceptor])),   // primero el real…
+      provideHttpClientTesting(),                               // …después el de prueba
+      { provide: AuthService, useValue: { token: () =&gt; 'abc' } },
+    ],
+  });
+});
+
+it('agrega el token solo a mi API', () =&gt; {
+  const http = TestBed.inject(HttpClient);
+  const ctrl = TestBed.inject(HttpTestingController);
+
+  http.get(`${API_URL}/libros`).subscribe();
+  http.get('https://openlibrary.org/search.json').subscribe();
+
+  expect(ctrl.expectOne(`${API_URL}/libros`).request.headers.get('Authorization')).toBe('Bearer abc');
+  expect(ctrl.expectOne('https://openlibrary.org/search.json').request.headers.has('Authorization')).toBe(false);
+  ctrl.verify();
+});</code></pre></div>
+  <div class="nota"><strong>Los interceptors "de clase"</strong>En proyectos viejos verás <code>class AuthInterceptor implements HttpInterceptor</code> registrado con <code>HTTP_INTERCEPTORS</code> y <code>withInterceptorsFromDi()</code>. Hace lo mismo; para código nuevo usa funciones (<code>HttpInterceptorFn</code>).</div>
+</section>
+
+<section id="ng-guards">
+  <h2>Guards: quién puede entrar (y salir) de una ruta<a class="ancla" href="#ng-guards">#</a></h2>
+  <p>Un <b>guard</b> es una función que el <b>router</b> ejecuta antes de cambiar de pantalla. Devuelve <code>true</code> (adelante), <code>false</code> (no) o una <b>UrlTree</b> (redirige a otra ruta). También puede devolver un Observable o una Promesa de esos valores.</p>
+  <div class="diagrama">
+    <svg viewBox="0 0 760 210" role="img" aria-label="El usuario navega a /admin, el router busca la ruta y ejecuta authGuard; si devuelve true se muestra la página, si devuelve una UrlTree se redirige a /login">
+      <rect class="caja" x="10" y="70" width="140" height="70" rx="10"/><text x="80" y="100" text-anchor="middle">Usuario</text><text class="sub" x="80" y="120" text-anchor="middle">navega a /libros</text>
+      <rect class="caja" x="190" y="70" width="130" height="70" rx="10"/><text x="255" y="100" text-anchor="middle">Router</text><text class="sub" x="255" y="120" text-anchor="middle">encuentra la ruta</text>
+      <rect class="caja a" x="360" y="70" width="150" height="70" rx="10"/><text x="435" y="100" text-anchor="middle">authGuard</text><text class="sub" x="435" y="120" text-anchor="middle">¿hay sesión?</text>
+      <rect class="caja f" x="590" y="15" width="160" height="60" rx="10"/><text x="670" y="41" text-anchor="middle">ListaLibros</text><text class="sub" x="670" y="60" text-anchor="middle">se muestra</text>
+      <rect class="caja" x="590" y="135" width="160" height="60" rx="10"/><text x="670" y="161" text-anchor="middle">/login?volver=…</text><text class="sub" x="670" y="180" text-anchor="middle">redirección</text>
+      <path class="flecha" d="M150 105H188"/><path class="flecha" d="M320 105H358"/>
+      <path class="flecha" d="M510 90C548 90 552 45 588 45"/><path class="flecha" d="M510 120C548 120 552 165 588 165"/>
+      <text class="sub" x="552" y="58" text-anchor="middle">true</text>
+      <text class="sub" x="540" y="160" text-anchor="middle">UrlTree</text>
+    </svg>
+  </div>
+  <table>
+    <tr><th>Tipo</th><th>Se ejecuta…</th><th>Uso típico</th></tr>
+    <tr><td><code>canActivate</code></td><td>antes de entrar a la ruta</td><td>"Solo con sesión"</td></tr>
+    <tr><td><code>canActivateChild</code></td><td>antes de entrar a cualquier hija</td><td>Proteger un grupo de rutas de una vez</td></tr>
+    <tr><td><code>canMatch</code></td><td>al decidir si la ruta "coincide"</td><td>Solo admins; si falla, <b>ni descarga</b> el código lazy</td></tr>
+    <tr><td><code>canDeactivate</code></td><td>antes de salir de la ruta</td><td>"Tienes cambios sin guardar"</td></tr>
+    <tr><td><code>resolve</code></td><td>antes de entrar, para traer datos</td><td>Cargar el libro antes de mostrar el detalle</td></tr>
+  </table>
+
+  <h3>authGuard: solo con sesión</h3>
+  <div class="bloque"><pre><code class="language-typescript">// core/guards.ts
+import { inject } from '@angular/core';
+import { CanActivateFn, CanDeactivateFn, CanMatchFn, ResolveFn, Router } from '@angular/router';
+import { AuthService } from './auth.service';
+
+export const authGuard: CanActivateFn = (route, state) =&gt; {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  if (auth.logueado()) return true;
+  // Redirige y recuerda a dónde quería ir
+  return router.createUrlTree(['/login'], { queryParams: { volver: state.url } });
+};</code></pre></div>
+
+  <h3>adminMatch: por rol, leyendo <code>data</code> de la ruta</h3>
+  <div class="bloque"><pre><code class="language-typescript">export const adminMatch: CanMatchFn = (route) =&gt; {
+  const roles = (route.data?.['roles'] ?? []) as string[];
+  const usuario = inject(AuthService).usuario();
+  const router = inject(Router);
+  return roles.some((r) =&gt; usuario?.roles.includes(r)) ? true : router.parseUrl('/sin-permiso');
+};</code></pre></div>
+
+  <h3>cambiosGuard: no perder un formulario</h3>
+  <div class="bloque"><pre><code class="language-typescript">export interface ConCambios {
+  hayCambiosSinGuardar(): boolean;
+}
+
+export const cambiosGuard: CanDeactivateFn&lt;ConCambios&gt; = (componente) =&gt;
+  !componente.hayCambiosSinGuardar() || confirm('Tienes cambios sin guardar. ¿Salir igual?');
+
+// en el componente de edición
+export class EditarLibro implements ConCambios {
+  readonly form = new FormGroup({ /* ... */ });
+  hayCambiosSinGuardar() { return this.form.dirty; }
+}</code></pre></div>
+
+  <h3>libroResolver: datos listos antes de mostrar</h3>
+  <div class="bloque"><pre><code class="language-typescript">export const libroResolver: ResolveFn&lt;LibroApi&gt; = (route) =&gt;
+  inject(BibliotecaService).libro(Number(route.paramMap.get('id')));
+
+// con withComponentInputBinding(), llega como input con el mismo nombre de la clave
+export class DetalleLibro {
+  readonly libro = input.required&lt;LibroApi&gt;();
+}</code></pre></div>
+
+  <h3>Todo junto en las rutas</h3>
+  <div class="bloque"><pre><code class="language-typescript">// app.routes.ts
+export const routes: Routes = [
+  { path: 'login', loadComponent: () =&gt; import('./auth/login').then((m) =&gt; m.Login) },
+  {
+    path: '',
+    canActivateChild: [authGuard],                  // protege todas las hijas
+    children: [
+      { path: 'libros', component: ListaLibros },
+      { path: 'libros/:id', component: DetalleLibro, resolve: { libro: libroResolver } },
+      { path: 'libros/:id/editar', component: EditarLibro, canDeactivate: [cambiosGuard] },
+    ],
+  },
+  {
+    path: 'admin',
+    canMatch: [adminMatch],
+    data: { roles: ['admin'] },
+    loadChildren: () =&gt; import('./admin/admin.routes').then((m) =&gt; m.ADMIN_ROUTES),
+  },
+  { path: '**', redirectTo: 'libros' },
+];</code></pre></div>
+  <p><code>authGuard</code> es un <code>CanActivateFn</code>, y la misma función sirve para <code>canActivateChild</code> porque recibe los mismos argumentos. En el login, después de entrar, vuelves a donde iba el usuario:</p>
+  <div class="bloque"><pre><code class="language-typescript">const volver = this.route.snapshot.queryParamMap.get('volver') ?? '/libros';
+this.auth.login(email, clave).subscribe(() =&gt; this.router.navigateByUrl(volver));</code></pre></div>
+  <div class="ojo"><strong>Un guard no es seguridad</strong>El guard solo esconde pantallas; cualquiera puede llamar a la API con <code>curl</code>. La protección real está en el servidor: cada endpoint revisa el token (ver <a href="#fl-headers">Headers y rutas protegidas en Flask</a>).</div>
+  <details><summary>Guard asíncrono: verificar la sesión con el servidor</summary>
+    <div class="bloque"><pre><code class="language-typescript">export const sesionValidaGuard: CanActivateFn = () =&gt; {
+  const router = inject(Router);
+  return inject(HttpClient).get(`${API_URL}/auth/yo`).pipe(
+    map(() =&gt; true),
+    catchError(() =&gt; of(router.parseUrl('/login'))),   // el router espera a que el Observable emita
+  );
+};</code></pre></div>
+  </details>
+</section>
+
+<section id="ng-promesas">
+  <h2>Observables vs. promesas (async/await)<a class="ancla" href="#ng-promesas">#</a></h2>
+  <p>Una <b>promesa</b> representa <b>un</b> valor que llegará en el futuro (o un error). Un <b>Observable</b> es un flujo que puede dar <b>muchos</b> valores, no arranca hasta que te suscribes y se puede cancelar.</p>
+  <div class="diagrama">
+    <svg viewBox="0 0 760 170" role="img" aria-label="Línea de tiempo: el Observable emite varios valores y luego completa; la Promesa resuelve un solo valor y termina">
+      <text x="10" y="55">Observable</text><text class="sub" x="10" y="73">perezoso · cancelable</text>
+      <path class="linea" d="M170 50H700"/><circle class="punto" cx="260" cy="50" r="9"/><circle class="punto" cx="360" cy="50" r="9"/><circle class="punto" cx="470" cy="50" r="9"/><path class="linea" d="M600 36V64" style="stroke-width:3"/>
+      <text class="sub" x="260" y="30" text-anchor="middle">"bor"</text><text class="sub" x="360" y="30" text-anchor="middle">"borg"</text><text class="sub" x="470" y="30" text-anchor="middle">"borges"</text><text class="sub" x="600" y="86" text-anchor="middle">complete</text>
+      <text x="10" y="135">Promesa</text><text class="sub" x="10" y="153">ansiosa · 1 valor</text>
+      <path class="linea" d="M170 130H420"/><circle class="punto" cx="420" cy="130" r="9"/>
+      <text class="sub" x="420" y="110" text-anchor="middle">resuelve una vez</text><text class="sub" x="560" y="135" text-anchor="middle">y ya no emite más</text>
+    </svg>
+  </div>
+  <table>
+    <tr><th></th><th>Observable (RxJS)</th><th>Promesa</th></tr>
+    <tr><td>Valores</td><td>0, 1 o muchos</td><td>Exactamente 1 (o error)</td></tr>
+    <tr><td>Cuándo arranca</td><td>Al suscribirte (perezoso)</td><td>Al crearla (ansiosa)</td></tr>
+    <tr><td>Cancelar</td><td><code>unsubscribe()</code>, <code>switchMap</code></td><td>No se puede (con <code>fetch</code>: <code>AbortController</code>)</td></tr>
+    <tr><td>Transformar</td><td>Operadores: <code>map</code>, <code>debounceTime</code>, <code>retry</code>…</td><td><code>.then()</code> o <code>await</code></td></tr>
+    <tr><td>Errores</td><td><code>catchError</code> o <code>error:</code> en subscribe</td><td><code>try / catch</code> o <code>.catch()</code></td></tr>
+    <tr><td>Varias en paralelo</td><td><code>forkJoin([a$, b$])</code></td><td><code>Promise.all([a, b])</code></td></tr>
+    <tr><td>Ideal para</td><td>Teclas, búsquedas, websockets, cualquier cosa con tiempo</td><td>Una llamada y listo; código secuencial fácil de leer</td></tr>
+  </table>
+
+  <h3>La misma petición, de tres formas</h3>
+  <div class="bloque"><pre><code class="language-typescript">// 1) Observable con HttpClient (lo normal en Angular)
+this.biblioteca.libros().subscribe({
+  next: (libros) =&gt; this.libros.set(libros),
+  error: (e: HttpErrorResponse) =&gt; this.error.set(e.error?.error ?? 'Error'),
+});
+
+// 2) Promesa a partir de HttpClient: firstValueFrom + async/await
+import { firstValueFrom } from 'rxjs';
+
+async cargar() {
+  this.cargando.set(true);
+  try {
+    const libros = await firstValueFrom(this.biblioteca.libros());
+    this.libros.set(libros);
+  } catch (e) {
+    this.error.set((e as HttpErrorResponse).error?.error ?? 'Error');
+  } finally {
+    this.cargando.set(false);
+  }
+}
+
+// 3) fetch nativo (sin HttpClient)
+async cargarConFetch() {
+  const res = await fetch(`${API_URL}/libros`, {
+    headers: { Authorization: `Bearer ${this.auth.token()}` },   // a mano
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);           // fetch NO falla con 404/500
+  const datos: { items: LibroApi[] } = await res.json();
+  this.libros.set(datos.items);
+}</code></pre></div>
+
+  <h3>¿Qué cambia con los headers?</h3>
+  <p>Esta es la diferencia que más confunde: <b>convertir a promesa no es lo mismo que usar fetch</b>.</p>
+  <table>
+    <tr><th></th><th>HttpClient (Observable)</th><th><code>firstValueFrom(http…)</code></th><th><code>fetch</code> directo</th></tr>
+    <tr><td>¿Pasa por interceptors?</td><td>Sí</td><td><b>Sí</b> (sigue siendo HttpClient)</td><td><b>No</b></td></tr>
+    <tr><td><code>Authorization</code></td><td>Lo pone el interceptor</td><td>Lo pone el interceptor</td><td>A mano en cada llamada</td></tr>
+    <tr><td>Cuerpo JSON</td><td>Objeto; <code>Content-Type</code> automático</td><td>Igual</td><td><code>JSON.stringify</code> + <code>Content-Type</code> a mano</td></tr>
+    <tr><td>Error 4xx / 5xx</td><td>Va a <code>error</code></td><td>La promesa se rechaza (<code>catch</code>)</td><td><b>No se rechaza</b>: revisa <code>res.ok</code></td></tr>
+    <tr><td>Leer headers de respuesta</td><td><code>observe: 'response'</code></td><td>Igual</td><td><code>res.headers.get('X-Total-Count')</code></td></tr>
+    <tr><td>Cookies a otro dominio</td><td><code>withCredentials: true</code></td><td>Igual</td><td><code>credentials: 'include'</code></td></tr>
+    <tr><td>Cancelar</td><td><code>unsubscribe</code> / <code>switchMap</code></td><td>No</td><td><code>AbortController</code></td></tr>
+    <tr><td>Tests</td><td><code>HttpTestingController</code></td><td>Igual</td><td>Hay que simular <code>fetch</code></td></tr>
+  </table>
+  <div class="nota"><strong><code>withFetch()</code> no es lo mismo que <code>fetch</code></strong><code>provideHttpClient(withFetch())</code> hace que HttpClient use <code>fetch</code> <i>por dentro</i> (útil con SSR), pero tú sigues usando HttpClient: los interceptors y los headers automáticos funcionan igual.</div>
+
+  <p>Si tienes que usar <code>fetch</code> (por ejemplo en un script fuera de Angular), centraliza los headers en una función, que hace el papel del interceptor:</p>
+  <div class="bloque"><pre><code class="language-typescript">export async function api&lt;T&gt;(ruta: string, opciones: RequestInit = {}): Promise&lt;T&gt; {
+  const token = localStorage.getItem('token');
+  const res = await fetch(`${API_URL}${ruta}`, {
+    ...opciones,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(opciones.headers as Record&lt;string, string&gt;),
+    },
+  });
+  if (!res.ok) {
+    const cuerpo = await res.json().catch(() =&gt; null);
+    throw new Error(cuerpo?.error ?? `HTTP ${res.status}`);
+  }
+  return res.status === 204 ? (undefined as T) : res.json();
+}
+
+// uso
+const libro = await api&lt;LibroApi&gt;('/libros', { method: 'POST', body: JSON.stringify({ titulo: 'Ficciones', autor_id: 1 }) });</code></pre></div>
+
+  <h3>Bonus: <code>httpResource</code>, HTTP directo a signals</h3>
+  <p>En Angular moderno (19.2+) <code>httpResource</code> hace la petición y te devuelve signals. Cuando cambia un signal que usa (el <code>id</code>), repite la petición sola. Usa HttpClient por dentro, así que también pasa por los interceptors.</p>
+  <div class="bloque"><pre><code class="language-typescript">export class DetalleLibro {
+  readonly id = input.required&lt;number&gt;();
+  readonly libro = httpResource&lt;LibroApi&gt;(() =&gt; `${API_URL}/libros/${this.id()}`);
+}</code></pre></div>
+  <div class="bloque"><pre><code class="language-html">@if (libro.isLoading()) { &lt;p&gt;Cargando…&lt;/p&gt; }
+@else if (libro.error()) { &lt;p role="alert"&gt;No se pudo cargar&lt;/p&gt; }
+@else { &lt;h1&gt;{{ libro.value()?.titulo }}&lt;/h1&gt; }</code></pre></div>
+
+  <div class="idea"><strong>Qué usar</strong>
+    <p><b>Búsquedas, teclas, cualquier cosa que cambie en el tiempo:</b> Observables (<code>switchMap</code> cancela lo viejo).</p>
+    <p><b>Una llamada en respuesta a un clic, varios pasos seguidos:</b> <code>await firstValueFrom(...)</code> se lee más fácil.</p>
+    <p><b>Mostrar datos que dependen de un id o filtro:</b> <code>httpResource</code>.</p>
+    <p><b>En Angular, casi nunca <code>fetch</code> directo:</b> pierdes interceptors y tests.</p>
+  </div>
+</section>
+
 <!-- ============================== FLASK ============================== -->
 <div class="parte flask" id="flask">
   <span class="etiqueta">Parte 2 · Flask</span>
@@ -918,6 +1483,99 @@ flask --app wsgi db downgrade                     # deshace la última</code></p
     <tr><td><code>500</code></td><td>Error inesperado</td><td>Bug; se hace rollback y se registra en el log</td></tr>
   </table>
   <p>Todas las respuestas de error tienen la misma forma, fácil de mostrar en un frontend: <code>{"error": "Autor no encontrado"}</code>.</p>
+</section>
+
+<section id="fl-headers">
+  <h2>Headers y rutas protegidas<a class="ancla" href="#fl-headers">#</a></h2>
+  <p>Del lado del servidor pasa lo mismo que en Angular, con otros nombres: Flask tiene sus propios "interceptors" (<code>before_request</code> / <code>after_request</code>) y sus propios "guards" (decoradores).</p>
+  <table>
+    <tr><th>En Angular</th><th>En Flask</th><th>Para qué</th></tr>
+    <tr><td><code>HttpHeaders</code></td><td><code>request.headers</code></td><td>Leer / mandar cabeceras</td></tr>
+    <tr><td>Interceptor</td><td><code>@app.before_request</code> / <code>@app.after_request</code></td><td>Código que corre en todas las peticiones</td></tr>
+    <tr><td>Guard</td><td>Decorador <code>@requiere_token</code></td><td>Bloquear una ruta si no hay permiso</td></tr>
+    <tr><td><code>catchError</code> global</td><td><code>@app.errorhandler</code> (<code>errors.py</code>)</td><td>Convertir errores en respuestas</td></tr>
+  </table>
+
+  <h3>Leer y devolver headers</h3>
+  <div class="bloque"><pre><code class="language-python">from flask import request
+
+idioma = request.headers.get("Accept-Language", "es")   # no distingue mayúsculas
+token = request.headers.get("Authorization")            # None si no vino
+
+# Devolver headers: tercer elemento de la tupla
+@bp.get("")
+def listar():
+    libros = libros_service.listar()
+    return {"items": [l.to_dict() for l in libros]}, 200, {"X-Total-Count": str(len(libros))}</code></pre></div>
+
+  <h3>before_request / after_request: el "interceptor" de Flask</h3>
+  <div class="bloque"><pre><code class="language-python"># app/__init__.py, dentro de create_app()
+import time
+import uuid
+
+from flask import g, request
+
+@app.before_request
+def antes():
+    g.inicio = time.perf_counter()                                    # g: datos de ESTA petición
+    g.request_id = request.headers.get("X-Request-Id") or str(uuid.uuid4())
+
+@app.after_request
+def despues(respuesta):
+    ms = (time.perf_counter() - g.inicio) * 1000
+    respuesta.headers["X-Request-Id"] = g.request_id                  # el cliente lo puede citar al reportar un error
+    respuesta.headers["Server-Timing"] = f"app;dur={ms:.1f}"          # se ve en la pestaña Red del navegador
+    return respuesta</code></pre></div>
+  <p>Si <code>before_request</code> devuelve algo (una respuesta), Flask <b>no ejecuta la ruta</b>: así se podría bloquear toda la API. Para bloquear solo algunas rutas se usa un decorador.</p>
+
+  <h3>@requiere_token: el "guard" de Flask</h3>
+  <div class="bloque"><pre><code class="language-python"># app/routes/auth.py
+from functools import wraps
+
+from flask import current_app, g, request
+from itsdangerous import BadSignature, URLSafeTimedSerializer   # viene instalado con Flask
+
+
+def _firmador():
+    return URLSafeTimedSerializer(current_app.config["SECRET_KEY"], salt="auth")
+
+
+def crear_token(socio_id: int) -&gt; str:
+    return _firmador().dumps({"id": socio_id})
+
+
+def verificar_token(token: str, max_age: int = 3600):
+    try:
+        return _firmador().loads(token, max_age=max_age)   # {"id": 7} o excepción
+    except BadSignature:                                   # incluye SignatureExpired
+        return None
+
+
+def requiere_token(vista):
+    @wraps(vista)                                          # conserva el nombre de la función (Flask lo necesita)
+    def envoltura(*args, **kwargs):
+        tipo, _, token = request.headers.get("Authorization", "").partition(" ")
+        if tipo != "Bearer" or not token:
+            return {"error": "Falta el token"}, 401, {"WWW-Authenticate": "Bearer"}
+        datos = verificar_token(token)
+        if datos is None:
+            return {"error": "Token inválido o vencido"}, 401
+        g.socio_id = datos["id"]                           # disponible dentro de la ruta
+        return vista(*args, **kwargs)
+    return envoltura</code></pre></div>
+  <div class="bloque"><pre><code class="language-python"># app/routes/prestamos.py
+@bp.post("")
+@requiere_token                       # el decorador de la ruta va ARRIBA, el guard debajo
+def prestar():
+    datos = leer_json()
+    prestamo = prestamos_service.prestar(libro_id=entero(datos, "libro_id"), socio_id=g.socio_id)
+    return prestamo.to_dict(), 201</code></pre></div>
+  <div class="bloque"><pre><code class="language-bash"># sin token → 401
+curl -i -X POST localhost:5000/prestamos -H "Content-Type: application/json" -d '{"libro_id": 1}'
+# con token → 201
+curl -i -X POST localhost:5000/prestamos -H "Content-Type: application/json" \
+     -H "Authorization: Bearer $TOKEN" -d '{"libro_id": 1}'</code></pre></div>
+  <div class="nota"><strong>SECRET_KEY</strong>Agrégala a <code>config.py</code> leyendo del entorno (<code>SECRET_KEY = os.environ["SECRET_KEY"]</code>) y ponla en <code>.env</code>. Para producción con varios servicios, el estándar es <b>JWT</b> (<code>PyJWT</code> o <code>flask-jwt-extended</code>); la idea del decorador es la misma.</div>
 </section>
 
 <section id="fl-transacciones">
@@ -1156,6 +1814,938 @@ this.biblioteca.prestar(1, 1).subscribe({
 });</code></pre></div>
 </section>
 
+<!-- ============================== ARQUITECTURA ============================== -->
+<div class="parte arq" id="arquitectura">
+  <span class="etiqueta">Parte 3 · Arquitectura</span>
+  <h1>Cómo organizar un proyecto que crece</h1>
+  <p>"Arquitectura" es cómo partes el código y cómo se hablan las partes. No hay una correcta: cada una cambia orden por complejidad. Aquí van las que más vas a escuchar, con un diagrama, la estructura de carpetas y cuándo conviene cada una.</p>
+</div>
+
+<section>
+  <h3>Primero: son dos preguntas distintas</h3>
+  <p>Mucha confusión viene de mezclar estas dos preguntas. Se combinan: puedes tener un <b>monolito modular</b> donde cada módulo es <b>hexagonal</b>.</p>
+  <div class="dos">
+    <div class="tarjeta">
+      <span class="chip arq">¿Cómo se organiza el código por dentro?</span>
+      <b>Capas · Hexagonal · Limpia · Cebolla · MVC</b>
+      <span>Reglas sobre quién puede importar a quién dentro de una aplicación.</span>
+    </div>
+    <div class="tarjeta">
+      <span class="chip arq">¿Cuántas piezas se despliegan?</span>
+      <b>Monolito · Monolito modular · Microservicios · Serverless</b>
+      <span>Cuántos procesos corren, cuántas bases de datos, cómo se comunican por la red.</span>
+    </div>
+  </div>
+</section>
+
+<section id="arq-capas">
+  <h2>Arquitectura en capas (N-capas)<a class="ancla" href="#arq-capas">#</a></h2>
+  <p><b>En una frase:</b> el código se apila en niveles; cada nivel solo usa al de abajo. Es la que usa <a href="#fl-capas">flask-biblioteca</a>.</p>
+  <div class="diagrama">
+    <svg viewBox="0 0 760 270" role="img" aria-label="Cuatro capas apiladas: presentación, negocio, acceso a datos y base de datos; cada una llama solo a la de abajo">
+      <rect class="caja h" x="180" y="10" width="380" height="48" rx="10"/><text x="370" y="32" text-anchor="middle">Presentación</text><text class="sub" x="370" y="49" text-anchor="middle">routes/ · componentes Angular · HTTP</text>
+      <rect class="caja h" x="180" y="78" width="380" height="48" rx="10"/><text x="370" y="100" text-anchor="middle">Negocio (servicios)</text><text class="sub" x="370" y="117" text-anchor="middle">services/ · reglas: "no prestar un libro prestado"</text>
+      <rect class="caja h" x="180" y="146" width="380" height="48" rx="10"/><text x="370" y="168" text-anchor="middle">Acceso a datos</text><text class="sub" x="370" y="185" text-anchor="middle">repositories/ · consultas SQLAlchemy</text>
+      <rect class="caja" x="180" y="214" width="380" height="48" rx="10"/><text x="370" y="236" text-anchor="middle">Base de datos</text><text class="sub" x="370" y="253" text-anchor="middle">PostgreSQL · models/</text>
+      <path class="flecha" d="M370 58V76"/><path class="flecha" d="M370 126V144"/><path class="flecha" d="M370 194V212"/>
+      <text class="sub" x="580" y="120">cada capa llama</text><text class="sub" x="580" y="137">solo a la de abajo</text>
+      <text class="sub" x="20" y="120">la dependencia</text><text class="sub" x="20" y="137">baja hacia la BD</text>
+    </svg>
+  </div>
+  <div class="pro-contra">
+    <div class="si"><b>Ventajas</b><ul><li>Fácil de entender y de enseñar</li><li>Separa HTTP, reglas y SQL</li><li>Sirve para el 80% de las APIs</li></ul></div>
+    <div class="no"><b>Desventajas</b><ul><li>El negocio depende de la BD (está "arriba" de ella)</li><li>Tiende a servicios gigantes con todo adentro</li><li>Cambiar de BD toca la capa de negocio</li></ul></div>
+  </div>
+  <p><b>Úsala cuando:</b> empiezas un proyecto, el equipo es chico, las reglas de negocio son pocas o medianas.</p>
+</section>
+
+<section id="arq-monolito">
+  <h2>Monolito<a class="ancla" href="#arq-monolito">#</a></h2>
+  <p><b>En una frase:</b> toda la aplicación es <b>un solo programa</b> que se despliega junto, con una base de datos. Un monolito puede estar bien ordenado (en capas) o ser un "plato de espagueti".</p>
+  <div class="diagrama">
+    <svg viewBox="0 0 760 240" role="img" aria-label="Un único proceso que contiene usuarios, catálogo, préstamos y pagos, que se llaman entre todos, conectado a una sola base de datos">
+      <rect class="zona" x="120" y="10" width="520" height="140" rx="14"/>
+      <text x="380" y="36" text-anchor="middle">Una sola app · un proceso · un deploy</text>
+      <rect class="caja h" x="145" y="70" width="105" height="50" rx="8"/><text x="197" y="100" text-anchor="middle">Usuarios</text>
+      <rect class="caja h" x="270" y="70" width="105" height="50" rx="8"/><text x="322" y="100" text-anchor="middle">Catálogo</text>
+      <rect class="caja h" x="395" y="70" width="105" height="50" rx="8"/><text x="447" y="100" text-anchor="middle">Préstamos</text>
+      <rect class="caja h" x="520" y="70" width="105" height="50" rx="8"/><text x="572" y="100" text-anchor="middle">Pagos</text>
+      <path class="linea" d="M197 120C250 145 400 145 447 120" style="stroke-dasharray:4 4"/>
+      <path class="linea" d="M322 70C380 50 520 50 572 70" style="stroke-dasharray:4 4"/>
+      <path class="linea" d="M197 70C280 48 400 48 447 70" style="stroke-dasharray:4 4"/>
+      <rect class="caja" x="290" y="182" width="180" height="50" rx="10"/><text x="380" y="204" text-anchor="middle">Una base de datos</text><text class="sub" x="380" y="222" text-anchor="middle">todas las tablas juntas</text>
+      <path class="flecha" d="M380 150V180"/>
+      <text class="sub" x="490" y="204">si todos se llaman entre todos,</text><text class="sub" x="490" y="222">es un "plato de espagueti"</text>
+    </svg>
+  </div>
+  <div class="pro-contra">
+    <div class="si"><b>Ventajas</b><ul><li>Lo más simple de programar, probar y desplegar</li><li>Una transacción cubre todo</li><li>Sin latencia de red entre partes</li></ul></div>
+    <div class="no"><b>Desventajas</b><ul><li>Si no hay reglas, todo termina acoplado</li><li>Se despliega todo aunque cambies una línea</li><li>Escala como un bloque</li></ul></div>
+  </div>
+  <div class="idea"><strong>El monolito no es malo</strong>La mayoría de productos exitosos empezaron como monolito. El problema no es "ser uno solo", es no tener límites internos. Para eso existe el monolito modular.</div>
+</section>
+
+<section id="arq-modular">
+  <h2>Monolito modular<a class="ancla" href="#arq-modular">#</a></h2>
+  <p><b>En una frase:</b> sigue siendo <b>un solo deploy</b>, pero partido en <b>módulos</b> por tema del negocio, y cada módulo solo se deja usar por su <b>puerta pública</b>. Lo mejor de los dos mundos para equipos chicos y medianos.</p>
+  <div class="diagrama">
+    <svg viewBox="0 0 760 270" role="img" aria-label="Un deploy con tres módulos: catálogo, préstamos y socios. Cada uno tiene su api pública; préstamos llama solo a la api de catálogo y de socios. Una base de datos con un esquema por módulo">
+      <rect class="zona" x="20" y="10" width="720" height="165" rx="14"/>
+      <text class="sub" x="380" y="30" text-anchor="middle">un solo deploy</text>
+      <rect class="caja h" x="50" y="45" width="180" height="115" rx="10"/><text x="140" y="72" text-anchor="middle">catalogo/</text><text class="sub" x="140" y="92" text-anchor="middle">modelos, repos (internos)</text>
+      <rect class="caja h" x="290" y="45" width="180" height="115" rx="10"/><text x="380" y="72" text-anchor="middle">prestamos/</text><text class="sub" x="380" y="92" text-anchor="middle">modelos, repos (internos)</text>
+      <rect class="caja h" x="530" y="45" width="180" height="115" rx="10"/><text x="620" y="72" text-anchor="middle">socios/</text><text class="sub" x="620" y="92" text-anchor="middle">modelos, repos (internos)</text>
+      <rect class="nucleo" x="70" y="114" width="140" height="32" rx="7"/><text class="sub" x="140" y="135" text-anchor="middle">api.py (pública)</text>
+      <rect class="nucleo" x="310" y="114" width="140" height="32" rx="7"/><text class="sub" x="380" y="135" text-anchor="middle">api.py (pública)</text>
+      <rect class="nucleo" x="550" y="114" width="140" height="32" rx="7"/><text class="sub" x="620" y="135" text-anchor="middle">api.py (pública)</text>
+      <path class="flecha" d="M310 130H212"/><path class="flecha" d="M450 130H548"/>
+      <rect class="caja" x="230" y="200" width="300" height="58" rx="10"/><text x="380" y="224" text-anchor="middle">PostgreSQL</text><text class="sub" x="380" y="244" text-anchor="middle">un esquema por módulo: catalogo · prestamos · socios</text>
+      <path class="flecha" d="M380 175V198"/>
+    </svg>
+  </div>
+  <div class="bloque"><pre><code class="language-plaintext">app/
+├── catalogo/
+│   ├── __init__.py       ← exporta SOLO lo público: from .api import buscar_libro, marcar_prestado
+│   ├── api.py            ← la "puerta" del módulo (funciones o una clase fachada)
+│   ├── models.py         ← internos: nadie de afuera los importa
+│   ├── repositories.py
+│   ├── services.py
+│   └── routes.py
+├── prestamos/
+│   └── services.py       ← from app.catalogo import marcar_prestado   ✅
+│                           from app.catalogo.models import Libro      ❌ prohibido
+└── socios/</code></pre></div>
+  <ul>
+    <li><b>Regla de oro:</b> un módulo nunca importa los modelos ni repositorios de otro. Solo su <code>api.py</code>.</li>
+    <li>Cada módulo es dueño de sus tablas. Nada de <code>JOIN</code> entre tablas de distintos módulos.</li>
+    <li>Las reglas se hacen cumplir con herramientas: <code>import-linter</code> en Python, <code>eslint-plugin-boundaries</code> o Nx en Angular.</li>
+    <li>Si un día un módulo necesita escalar solo, ya está listo para salir como microservicio: su api se vuelve HTTP.</li>
+  </ul>
+</section>
+
+<section id="arq-hexagonal">
+  <h2>Hexagonal (puertos y adaptadores)<a class="ancla" href="#arq-hexagonal">#</a></h2>
+  <p><b>En una frase:</b> el <b>negocio está en el centro</b> y no sabe nada de Flask, ni de Postgres, ni de HTTP. Habla con el mundo a través de <b>puertos</b> (interfaces), y el mundo se conecta con <b>adaptadores</b> (implementaciones) que se pueden cambiar.</p>
+  <div class="diagrama">
+    <svg viewBox="0 0 760 300" role="img" aria-label="Hexágono: en el centro el dominio, alrededor los casos de uso. A la izquierda adaptadores de entrada (ruta Flask, comando CLI, test) llaman al núcleo. A la derecha adaptadores de salida (repositorio SQLAlchemy, email, repositorio en memoria) implementan los puertos">
+      <text class="sub" x="105" y="30" text-anchor="middle">Adaptadores de entrada</text><text class="chico" x="105" y="46" text-anchor="middle">(quien llama al negocio)</text>
+      <text class="sub" x="655" y="30" text-anchor="middle">Adaptadores de salida</text><text class="chico" x="655" y="46" text-anchor="middle">(lo que el negocio necesita)</text>
+      <polygon class="anillo" points="500,170 440,274 320,274 260,170 320,66 440,66"/>
+      <polygon class="nucleo" points="440,170 410,222 350,222 320,170 350,118 410,118"/>
+      <text x="380" y="166" text-anchor="middle">Dominio</text><text class="sub" x="380" y="184" text-anchor="middle">Libro.prestar()</text>
+      <text class="sub" x="380" y="96" text-anchor="middle">Casos de uso</text><text class="chico" x="380" y="110" text-anchor="middle">PrestarLibro</text>
+      <text class="chico" x="380" y="250" text-anchor="middle">puertos = interfaces</text><text class="chico" x="380" y="264" text-anchor="middle">(Protocol)</text>
+      <rect class="caja a" x="20" y="64" width="170" height="54" rx="10"/><text x="105" y="88" text-anchor="middle">Ruta Flask</text><text class="sub" x="105" y="106" text-anchor="middle">HTTP → caso de uso</text>
+      <rect class="caja a" x="20" y="144" width="170" height="54" rx="10"/><text x="105" y="168" text-anchor="middle">Comando CLI</text><text class="sub" x="105" y="186" text-anchor="middle">flask prestar 1 7</text>
+      <rect class="caja a" x="20" y="224" width="170" height="54" rx="10"/><text x="105" y="248" text-anchor="middle">Test</text><text class="sub" x="105" y="266" text-anchor="middle">llama directo</text>
+      <rect class="caja f" x="570" y="64" width="170" height="54" rx="10"/><text x="655" y="88" text-anchor="middle">RepoSQLAlchemy</text><text class="sub" x="655" y="106" text-anchor="middle">Postgres de verdad</text>
+      <rect class="caja f" x="570" y="144" width="170" height="54" rx="10"/><text x="655" y="168" text-anchor="middle">NotificadorEmail</text><text class="sub" x="655" y="186" text-anchor="middle">SMTP</text>
+      <rect class="caja f" x="570" y="224" width="170" height="54" rx="10"/><text x="655" y="248" text-anchor="middle">RepoEnMemoria</text><text class="sub" x="655" y="266" text-anchor="middle">un dict, para tests</text>
+      <path class="flecha" d="M190 91L284 116"/><path class="flecha" d="M190 171H258"/><path class="flecha" d="M190 251L284 224"/>
+      <path class="flecha punteada" d="M570 91L476 116"/><path class="flecha punteada" d="M570 171H502"/><path class="flecha punteada" d="M570 251L476 224"/>
+    </svg>
+  </div>
+  <p>Todas las flechas apuntan <b>hacia adentro</b>: el núcleo no importa nada de afuera. Los adaptadores de la derecha <i>implementan</i> un puerto (línea punteada). Esto se llama <b>inversión de dependencias</b>.</p>
+  <div class="bloque"><pre><code class="language-plaintext">app/
+├── dominio/              ← Python puro: NO importa flask ni sqlalchemy
+│   ├── libro.py          ← entidad con sus reglas
+│   └── puertos.py        ← interfaces: RepositorioLibros, Notificador
+├── aplicacion/
+│   └── prestar_libro.py  ← caso de uso: coordina dominio + puertos
+└── adaptadores/
+    ├── entrada/http.py   ← blueprint Flask → llama al caso de uso
+    └── salida/
+        ├── repo_sqlalchemy.py
+        ├── notificador_email.py
+        └── repo_memoria.py</code></pre></div>
+  <div class="bloque"><pre><code class="language-python"># dominio/libro.py — la regla vive aquí, no en la ruta ni en el repositorio
+from dataclasses import dataclass
+
+
+class LibroNoDisponible(Exception):
+    pass
+
+
+@dataclass
+class Libro:
+    id: int
+    titulo: str
+    disponible: bool = True
+
+    def prestar(self) -&gt; None:
+        if not self.disponible:
+            raise LibroNoDisponible(self.titulo)
+        self.disponible = False</code></pre></div>
+  <div class="bloque"><pre><code class="language-python"># dominio/puertos.py — lo que el negocio NECESITA, sin decir cómo
+from typing import Protocol
+
+from .libro import Libro
+
+
+class RepositorioLibros(Protocol):
+    def obtener(self, libro_id: int) -&gt; Libro | None: ...
+    def guardar(self, libro: Libro) -&gt; None: ...
+
+
+class Notificador(Protocol):
+    def avisar(self, socio_id: int, mensaje: str) -&gt; None: ...</code></pre></div>
+  <div class="bloque"><pre><code class="language-python"># aplicacion/prestar_libro.py — el caso de uso recibe los puertos (no los crea)
+from app.dominio.libro import Libro
+from app.dominio.puertos import Notificador, RepositorioLibros
+
+
+class PrestarLibro:
+    def __init__(self, libros: RepositorioLibros, notificador: Notificador):
+        self.libros = libros
+        self.notificador = notificador
+
+    def ejecutar(self, libro_id: int, socio_id: int) -&gt; Libro:
+        libro = self.libros.obtener(libro_id)
+        if libro is None:
+            raise LookupError(f"Libro {libro_id} no existe")
+        libro.prestar()
+        self.libros.guardar(libro)
+        self.notificador.avisar(socio_id, f"Prestaste «{libro.titulo}»")
+        return libro</code></pre></div>
+  <div class="bloque"><pre><code class="language-python"># adaptadores/salida/repo_memoria.py — cumple el puerto sin base de datos
+class RepoLibrosEnMemoria:
+    def __init__(self, libros):
+        self._libros = {l.id: l for l in libros}
+
+    def obtener(self, libro_id):
+        return self._libros.get(libro_id)
+
+    def guardar(self, libro):
+        self._libros[libro.id] = libro
+
+
+# tests/test_prestar_libro.py — sin Flask, sin Postgres, milisegundos
+from unittest.mock import Mock
+
+import pytest
+
+def test_no_presta_dos_veces():
+    caso = PrestarLibro(RepoLibrosEnMemoria([Libro(1, "Ficciones")]), notificador=Mock())
+    caso.ejecutar(1, socio_id=7)
+    with pytest.raises(LibroNoDisponible):
+        caso.ejecutar(1, socio_id=8)</code></pre></div>
+  <div class="bloque"><pre><code class="language-python"># adaptadores/entrada/http.py — la ruta solo traduce HTTP ↔ caso de uso
+@bp.post("/prestamos")
+def prestar():
+    datos = leer_json()
+    caso = PrestarLibro(RepoLibrosSQLAlchemy(db.session), NotificadorEmail())
+    libro = caso.ejecutar(entero(datos, "libro_id"), entero(datos, "socio_id"))
+    return {"id": libro.id, "disponible": libro.disponible}, 201</code></pre></div>
+  <p><b>En Angular</b> la misma idea sale gratis con la inyección de dependencias: el puerto es una clase abstracta y el adaptador se elige en los providers.</p>
+  <div class="bloque"><pre><code class="language-typescript">export abstract class LibrosRepositorio {               // puerto
+  abstract buscar(texto: string): Observable&lt;Libro[]&gt;;
+}
+
+@Injectable()
+export class LibrosOpenLibrary implements LibrosRepositorio { /* HttpClient … */ }   // adaptador
+
+// app.config.ts — cambiar de API es cambiar UNA línea
+providers: [{ provide: LibrosRepositorio, useClass: LibrosOpenLibrary }]
+
+// el componente pide el puerto, no la implementación
+private readonly libros = inject(LibrosRepositorio);</code></pre></div>
+  <table>
+    <tr><th></th><th>Capas</th><th>Hexagonal</th></tr>
+    <tr><td>¿Qué está en el centro?</td><td>La base de datos (abajo de todo)</td><td>El negocio</td></tr>
+    <tr><td>El servicio depende de…</td><td>Un repositorio concreto</td><td>Una interfaz (puerto)</td></tr>
+    <tr><td>Testear reglas</td><td>Necesitas BD o mocks de SQLAlchemy</td><td>Un adaptador en memoria y listo</td></tr>
+    <tr><td>Cantidad de archivos</td><td>Menos</td><td>Más (interfaces + adaptadores)</td></tr>
+    <tr><td>Conviene cuando…</td><td>CRUD con algunas reglas</td><td>Muchas reglas, varias entradas/salidas, vida larga</td></tr>
+  </table>
+</section>
+
+<section id="arq-limpia">
+  <h2>Arquitectura limpia y cebolla<a class="ancla" href="#arq-limpia">#</a></h2>
+  <p><b>En una frase:</b> la misma idea que la hexagonal, dibujada en <b>círculos</b>. <i>Clean Architecture</i> (Robert C. Martin) y <i>Onion</i> (Jeffrey Palermo) solo cambian nombres y cuántos anillos hay. La única regla: <b>los imports siempre apuntan hacia el centro</b>.</p>
+  <div class="diagrama">
+    <svg viewBox="0 0 760 300" role="img" aria-label="Círculos concéntricos: en el centro entidades, luego casos de uso, luego adaptadores, y afuera frameworks y base de datos. Las dependencias apuntan hacia el centro">
+      <circle class="anillo" cx="230" cy="150" r="135"/>
+      <circle class="anillo" cx="230" cy="150" r="100"/>
+      <circle class="anillo" cx="230" cy="150" r="65"/>
+      <circle class="nucleo" cx="230" cy="150" r="32"/>
+      <path class="flecha" d="M95 30L200 122"/><path class="flecha" d="M90 272L200 178"/>
+      <circle class="punto" cx="321" cy="50" r="4"/><path class="linea" d="M321 50H420"/><text x="428" y="55">Frameworks y BD</text><text class="sub" x="560" y="55">Flask, Angular, Postgres</text>
+      <circle class="punto" cx="313" cy="95" r="4"/><path class="linea" d="M313 95H420"/><text x="428" y="100">Adaptadores</text><text class="sub" x="530" y="100">rutas, repos, controladores</text>
+      <circle class="punto" cx="292" cy="130" r="4"/><path class="linea" d="M292 130H420"/><text x="428" y="135">Casos de uso</text><text class="sub" x="535" y="135">PrestarLibro</text>
+      <circle class="punto" cx="258" cy="165" r="4"/><path class="linea" d="M258 165H420"/><text x="428" y="170">Entidades</text><text class="sub" x="510" y="170">Libro, Prestamo</text>
+      <text class="sub" x="428" y="225">Regla de dependencia: un anillo puede importar</text>
+      <text class="sub" x="428" y="243">a los de adentro, nunca a los de afuera.</text>
+      <text class="chico" x="428" y="268">Las flechas grises: los imports van hacia el centro.</text>
+    </svg>
+  </div>
+  <table>
+    <tr><th>Hexagonal</th><th>Limpia</th><th>Cebolla</th><th>Qué hay</th></tr>
+    <tr><td>Dominio</td><td>Entities</td><td>Domain model</td><td>Entidades y reglas puras</td></tr>
+    <tr><td>Aplicación</td><td>Use cases</td><td>Application services</td><td>Casos de uso: "prestar libro"</td></tr>
+    <tr><td>Puertos</td><td>Interfaces / boundaries</td><td>Domain services (interfaces)</td><td>Lo que el núcleo necesita</td></tr>
+    <tr><td>Adaptadores</td><td>Interface adapters + frameworks</td><td>Infrastructure / UI</td><td>Flask, SQLAlchemy, email, Angular</td></tr>
+  </table>
+  <div class="nota"><strong>Si te preguntan la diferencia</strong>En la práctica, casi ninguna. Si entiendes la hexagonal, entiendes las tres.</div>
+</section>
+
+<section id="arq-servicios">
+  <h2>Servicios (SOA) y microservicios<a class="ancla" href="#arq-servicios">#</a></h2>
+  <p><b>En una frase:</b> la aplicación se parte en <b>varios programas que se despliegan por separado</b> y se hablan por la red (HTTP o mensajes). Cada microservicio es dueño de <b>su propia base de datos</b>.</p>
+  <div class="diagrama">
+    <svg viewBox="0 0 760 310" role="img" aria-label="Cliente llama a un API Gateway que reparte a los servicios de catálogo y préstamos, cada uno con su base de datos. Préstamos publica un evento en una cola de mensajes que consume el servicio de notificaciones">
+      <rect class="caja a" x="10" y="128" width="110" height="56" rx="10"/><text x="65" y="152" text-anchor="middle">Angular</text><text class="sub" x="65" y="170" text-anchor="middle">cliente</text>
+      <rect class="caja" x="160" y="128" width="130" height="56" rx="10"/><text x="225" y="152" text-anchor="middle">API Gateway</text><text class="sub" x="225" y="170" text-anchor="middle">auth, rutas</text>
+      <rect class="caja h" x="360" y="20" width="170" height="56" rx="10"/><text x="445" y="44" text-anchor="middle">Catálogo</text><text class="sub" x="445" y="62" text-anchor="middle">servicio Flask</text>
+      <rect class="caja h" x="360" y="128" width="170" height="56" rx="10"/><text x="445" y="152" text-anchor="middle">Préstamos</text><text class="sub" x="445" y="170" text-anchor="middle">servicio Flask</text>
+      <rect class="caja h" x="360" y="236" width="170" height="56" rx="10"/><text x="445" y="260" text-anchor="middle">Notificaciones</text><text class="sub" x="445" y="278" text-anchor="middle">servicio Node</text>
+      <rect class="caja" x="590" y="20" width="150" height="56" rx="10"/><text x="665" y="44" text-anchor="middle">BD catálogo</text><text class="sub" x="665" y="62" text-anchor="middle">solo suya</text>
+      <rect class="caja" x="590" y="128" width="150" height="56" rx="10"/><text x="665" y="152" text-anchor="middle">BD préstamos</text><text class="sub" x="665" y="170" text-anchor="middle">solo suya</text>
+      <rect class="caja i" x="590" y="236" width="150" height="56" rx="10"/><text x="665" y="260" text-anchor="middle">Cola de eventos</text><text class="sub" x="665" y="278" text-anchor="middle">RabbitMQ / Kafka</text>
+      <path class="flecha" d="M120 156H158"/>
+      <path class="flecha" d="M290 146L358 52"/><path class="flecha" d="M290 156H358"/>
+      <path class="flecha" d="M530 48H588"/><path class="flecha" d="M530 156H588"/>
+      <path class="flecha punteada" d="M500 184L620 234"/><text class="chico" x="600" y="210">LibroPrestado</text>
+      <path class="flecha punteada" d="M590 270H532"/>
+    </svg>
+  </div>
+  <div class="pro-contra">
+    <div class="si"><b>Ventajas</b><ul><li>Cada equipo despliega su servicio sin esperar a otros</li><li>Escalas solo lo que lo necesita</li><li>Si uno cae, los demás pueden seguir</li><li>Cada servicio puede usar otra tecnología</li></ul></div>
+    <div class="no"><b>Desventajas</b><ul><li>La red falla: timeouts, reintentos, versiones</li><li>No hay transacción entre servicios (hace falta <i>saga</i>)</li><li>Depurar exige logs centralizados y trazas (<a href="#ia-odd">ODD</a>)</li><li>Infraestructura: Docker, Kubernetes, gateway, colas</li></ul></div>
+  </div>
+  <p><b>SOA vs. microservicios:</b> SOA (años 2000) también parte en servicios, pero más grandes y conectados por un bus central (ESB) con lógica adentro. Los microservicios son más chicos, independientes y con "tuberías tontas": la lógica está en los servicios, no en el bus.</p>
+  <div class="ojo"><strong>La advertencia clásica</strong>Si no logras un monolito ordenado, con microservicios obtienes un <b>monolito distribuido</b>: el mismo acoplamiento, pero ahora con latencia de red. Empieza modular; separa cuando un módulo tenga una razón concreta (escala, equipo, ritmo de cambios).</div>
+</section>
+
+<section id="arq-otras">
+  <h2>Otras que vas a escuchar<a class="ancla" href="#arq-otras">#</a></h2>
+  <div class="tarjetas">
+    <div class="tarjeta"><span class="chip arq">Por dentro</span><b>MVC</b><span><b>M</b>odelo (datos), <b>V</b>ista (lo que se ve), <b>C</b>ontrolador (recibe la acción). Es el patrón de Django, Rails, Laravel. Es "capas" aplicado a la interfaz.</span></div>
+    <div class="tarjeta"><span class="chip arq">Comunicación</span><b>Orientada a eventos</b><span>Las partes no se llaman: publican hechos ("LibroDevuelto") y quien le interese reacciona. Desacopla mucho, pero cuesta seguir el flujo.</span></div>
+    <div class="tarjeta"><span class="chip arq">Por dentro</span><b>CQRS</b><span>Separar el modelo de <b>escritura</b> (comandos, reglas) del de <b>lectura</b> (consultas rápidas, vistas). Útil cuando se lee mucho más de lo que se escribe.</span></div>
+    <div class="tarjeta"><span class="chip arq">Despliegue</span><b>Serverless</b><span>Funciones sueltas que corren por evento (AWS Lambda, Cloud Functions). No administras servidores; pagas por ejecución. Arranque en frío y límites de tiempo.</span></div>
+    <div class="tarjeta"><span class="chip arq">Frontend</span><b>Micro-frontends</b><span>Microservicios aplicados al frontend: cada equipo publica su parte de la pantalla. Solo vale la pena con muchos equipos en una misma app.</span></div>
+    <div class="tarjeta"><span class="chip arq">Diseño</span><b>Vertical slices</b><span>Organizar por funcionalidad completa ("prestar libro": ruta + lógica + consulta en una carpeta) en lugar de por capa técnica.</span></div>
+  </div>
+</section>
+
+<section id="arq-frontend">
+  <h2>Arquitectura en Angular<a class="ancla" href="#arq-frontend">#</a></h2>
+  <p>Las mismas ideas aplican al frontend. Una estructura que escala bien, con lo visto en esta guía:</p>
+  <div class="bloque"><pre><code class="language-plaintext">src/app/
+├── core/                    ← una sola vez en toda la app
+│   ├── api.ts               ← API_URL
+│   ├── auth.service.ts
+│   ├── auth.interceptor.ts  error.interceptor.ts  carga.ts
+│   └── guards.ts
+├── shared/                  ← piezas de UI reutilizables y "tontas"
+│   ├── boton/  tarjeta/  paginador/
+│   └── pipes/
+├── libros/                  ← una carpeta por funcionalidad (feature)
+│   ├── data/                ← servicios y modelos (habla con la API)
+│   ├── lista-libros/        ← componente "inteligente" (pide datos)
+│   ├── tarjeta-libro/       ← componente "presentacional" (solo inputs/outputs)
+│   └── libros.routes.ts     ← rutas lazy de la feature
+├── admin/
+├── app.config.ts
+└── app.routes.ts</code></pre></div>
+  <table>
+    <tr><th>Componente inteligente (contenedor)</th><th>Componente presentacional</th></tr>
+    <tr><td>Inyecta servicios, tiene signals de estado</td><td>Solo <code>input()</code> y <code>output()</code></td></tr>
+    <tr><td>Sabe de dónde vienen los datos</td><td>No sabe nada de HTTP</td></tr>
+    <tr><td>Uno por pantalla</td><td>Muchos, reutilizables, fáciles de testear</td></tr>
+  </table>
+  <ul>
+    <li><b>Reglas de dependencia:</b> <code>features → shared</code> y <code>features → core</code> sí; <code>shared → features</code> nunca; una feature no importa los internos de otra.</li>
+    <li>Cada feature con <code>loadChildren</code> se descarga solo cuando se visita (lazy loading).</li>
+  </ul>
+</section>
+
+<section id="arq-elegir">
+  <h2>Cuál elegir<a class="ancla" href="#arq-elegir">#</a></h2>
+  <table>
+    <tr><th>Arquitectura</th><th>Complejidad</th><th>Ideal para</th><th>Señal de que te quedó chica</th></tr>
+    <tr><td>Capas</td><td>Baja</td><td>CRUD, APIs pequeñas, aprender</td><td>Servicios de 1000 líneas; reglas repetidas</td></tr>
+    <tr><td>Monolito modular</td><td>Media</td><td>Productos reales con 1–3 equipos</td><td>Un módulo necesita escalar o desplegarse aparte</td></tr>
+    <tr><td>Hexagonal / limpia</td><td>Media-alta</td><td>Mucha lógica de negocio, vida larga, muchas integraciones</td><td>— (se combina con las demás)</td></tr>
+    <tr><td>Microservicios</td><td>Alta</td><td>Muchos equipos, partes con cargas muy distintas</td><td>Si te cuesta operar: quizá era demasiado pronto</td></tr>
+    <tr><td>Serverless</td><td>Media</td><td>Tareas por evento, tráfico irregular</td><td>Procesos largos o con mucho estado</td></tr>
+  </table>
+  <ol class="pasos">
+    <li><b>¿Es un proyecto de práctica o un CRUD?</b> Capas. Como flask-biblioteca.</li>
+    <li><b>¿Va a crecer y tiene varios temas de negocio?</b> Monolito modular: una carpeta por tema con su <code>api.py</code>.</li>
+    <li><b>¿Algún módulo tiene reglas complejas o muchas integraciones?</b> Hazlo hexagonal por dentro (solo ese módulo).</li>
+    <li><b>¿Un módulo necesita escalar, desplegarse o ser de otro equipo?</b> Sácalo como microservicio. Solo ese.</li>
+  </ol>
+</section>
+
+<!-- ============================== IA ============================== -->
+<div class="parte ia" id="ia">
+  <span class="etiqueta">Parte 4 · IA para desarrollar</span>
+  <h1>Prompts, skills, agentes y metodologías</h1>
+  <p>Los asistentes de terminal (Claude Code, Gemini CLI, Codex) ya no solo responden: leen tu proyecto, editan archivos, corren tests y delegan trabajo. Esta parte explica las piezas con las que se configuran, las metodologías que mejor funcionan con ellos y cómo dejarlos listos en tu máquina.</p>
+</div>
+
+<section>
+  <h3>Las piezas de un agente en la terminal</h3>
+  <div class="diagrama">
+    <svg viewBox="0 0 760 260" role="img" aria-label="Tú mandas un prompt al agente. Dentro del agente: el modelo en el centro, rodeado de memoria (CLAUDE.md), skills, comandos, hooks, subagentes, permisos, modos y herramientas con MCP">
+      <rect class="caja" x="10" y="100" width="110" height="60" rx="10"/><text x="65" y="126" text-anchor="middle">Tú</text><text class="sub" x="65" y="145" text-anchor="middle">prompt</text>
+      <path class="flecha" d="M120 130H158"/>
+      <rect class="zona" x="160" y="10" width="590" height="240" rx="14"/>
+      <text class="sub" x="455" y="32" text-anchor="middle">Agente en la terminal (Claude Code · Gemini CLI · Codex)</text>
+      <rect class="caja i" x="180" y="48" width="170" height="54" rx="10"/><text x="265" y="71" text-anchor="middle">Memoria</text><text class="sub" x="265" y="89" text-anchor="middle">CLAUDE.md · GEMINI.md</text>
+      <rect class="caja i" x="372" y="48" width="166" height="54" rx="10"/><text x="455" y="71" text-anchor="middle">Skills</text><text class="sub" x="455" y="89" text-anchor="middle">recetas a demanda</text>
+      <rect class="caja i" x="560" y="48" width="170" height="54" rx="10"/><text x="645" y="71" text-anchor="middle">Comandos /</text><text class="sub" x="645" y="89" text-anchor="middle">/init · /revisar …</text>
+      <rect class="caja i" x="180" y="118" width="170" height="54" rx="10"/><text x="265" y="141" text-anchor="middle">Hooks</text><text class="sub" x="265" y="159" text-anchor="middle">scripts automáticos</text>
+      <rect class="nucleo" x="372" y="118" width="166" height="54" rx="10"/><text x="455" y="141" text-anchor="middle">Modelo (LLM)</text><text class="sub" x="455" y="159" text-anchor="middle">razona y decide</text>
+      <rect class="caja i" x="560" y="118" width="170" height="54" rx="10"/><text x="645" y="141" text-anchor="middle">Subagentes</text><text class="sub" x="645" y="159" text-anchor="middle">trabajo delegado</text>
+      <rect class="caja i" x="180" y="188" width="170" height="54" rx="10"/><text x="265" y="211" text-anchor="middle">Permisos</text><text class="sub" x="265" y="229" text-anchor="middle">qué puede hacer solo</text>
+      <rect class="caja i" x="372" y="188" width="166" height="54" rx="10"/><text x="455" y="211" text-anchor="middle">Herramientas</text><text class="sub" x="455" y="229" text-anchor="middle">leer, editar, Bash, MCP</text>
+      <rect class="caja i" x="560" y="188" width="170" height="54" rx="10"/><text x="645" y="211" text-anchor="middle">Modos</text><text class="sub" x="645" y="229" text-anchor="middle">plan · normal · auto</text>
+    </svg>
+  </div>
+  <table>
+    <tr><th>Concepto</th><th>Qué es, en una frase</th></tr>
+    <tr><td>LLM (modelo)</td><td>El "cerebro": predice texto. Claude, Gemini, GPT. No recuerda nada entre sesiones por sí solo.</td></tr>
+    <tr><td>Token</td><td>Pedacito de texto (~¾ de palabra). Se cobra y se limita por tokens.</td></tr>
+    <tr><td>Ventana de contexto</td><td>Todo lo que el modelo "ve" a la vez: tu prompt, archivos leídos, historial. Si se llena, olvida lo de atrás.</td></tr>
+    <tr><td>Alucinación</td><td>Cuando inventa algo con seguridad (una función que no existe). Se combate con contexto real y verificación (tests).</td></tr>
+    <tr><td>Herramienta (tool)</td><td>Una acción que el modelo puede pedir: leer un archivo, correr un comando, buscar en la web.</td></tr>
+    <tr><td>Agente</td><td>Un modelo + herramientas + un ciclo: piensa, actúa, mira el resultado, repite hasta terminar.</td></tr>
+  </table>
+</section>
+
+<section id="ia-prompt">
+  <h2>Prompt: cómo pedir bien<a class="ancla" href="#ia-prompt">#</a></h2>
+  <p>Un <b>prompt</b> es el mensaje que le das al modelo. Hay dos tipos: el <b>system prompt</b> (instrucciones fijas que define la herramienta o tú en la configuración: "eres un asistente de código…") y el <b>prompt de usuario</b> (lo que escribes en cada turno). La calidad de la respuesta depende sobre todo del <b>contexto</b> que das.</p>
+  <table>
+    <tr><th>Parte</th><th>Pregunta que responde</th><th>Ejemplo</th></tr>
+    <tr><td>Contexto</td><td>¿Dónde estamos?</td><td>"Proyecto Angular 22 standalone + signals en <code>angular-buscador/</code>"</td></tr>
+    <tr><td>Tarea</td><td>¿Qué quiero?</td><td>"Agrega login con token Bearer"</td></tr>
+    <tr><td>Requisitos</td><td>¿Qué debe cumplir?</td><td>"El token solo va a <code>API_URL</code>; 401 → <code>/login</code>"</td></tr>
+    <tr><td>Restricciones</td><td>¿Qué no hacer?</td><td>"No instales librerías; sigue el estilo de <code>libros.service.ts</code>"</td></tr>
+    <tr><td>Verificación</td><td>¿Cómo sé que está bien?</td><td>"Agrega tests y corre <code>ng test --watch=false</code>"</td></tr>
+    <tr><td>Formato</td><td>¿Cómo quiero la respuesta?</td><td>"Primero un plan de 5 pasos, espera mi OK"</td></tr>
+  </table>
+  <div class="dos">
+    <div class="ojo"><strong>Vago</strong><p>haz un login</p><p>El modelo adivina: qué framework, dónde, con qué librería, cómo se guarda el token. Probablemente inventa una estructura que no es la tuya.</p></div>
+    <div class="idea"><strong>Concreto</strong><p>Contexto, tarea, requisitos, límites y cómo verificar. El modelo trabaja sobre <i>tu</i> código y sabe cuándo terminó.</p></div>
+  </div>
+  <div class="bloque"><pre><code class="language-markdown">Contexto: angular-buscador/ es Angular 22 con componentes standalone y signals.
+La API es flask-biblioteca/ (Flask, 3 capas) en http://127.0.0.1:5000.
+
+Tarea: agregar login con token Bearer.
+
+Requisitos:
+- AuthService con signal `token`, login() y cerrarSesion() (guardar en localStorage).
+- authInterceptor que agregue Authorization SOLO a peticiones a API_URL.
+- errorInterceptor: si llega 401, cerrar sesión e ir a /login?volver=&lt;url&gt;.
+- authGuard en las rutas de libros.
+
+Restricciones: no instales librerías nuevas. Sigue el estilo de libros.service.ts.
+
+Verificación: tests con HttpTestingController para el interceptor y el guard;
+corre `ng test --watch=false` y no termines hasta que pasen.
+
+Antes de escribir código, muéstrame un plan corto y espera mi OK.</code></pre></div>
+  <h3>Técnicas que funcionan</h3>
+  <ul>
+    <li><b>Señala archivos</b> con <code>@ruta/archivo.ts</code>: el agente lo lee en vez de imaginarlo.</li>
+    <li><b>Pide un plan primero</b> para tareas grandes (o usa el <i>modo plan</i>). Corregir un plan es barato; corregir 400 líneas no.</li>
+    <li><b>Da un ejemplo</b> del estilo que quieres ("hazlo como <code>autores_service.py</code>"). Un ejemplo vale más que tres párrafos de reglas.</li>
+    <li><b>Define "terminado"</b>: un comando que debe pasar (tests, lint, build). Es la forma de evitar que "parezca" listo.</li>
+    <li><b>Una tarea por conversación.</b> Cuando cambias de tema, limpia el contexto (<code>/clear</code>).</li>
+    <li><b>Explica el porqué</b> de una restricción: "no uses localStorage porque esta app corre en SSR" hace que el modelo tome mejores decisiones en casos que no previste.</li>
+  </ul>
+</section>
+
+<section id="ia-skill">
+  <h2>Skill (y comandos): recetas reutilizables<a class="ancla" href="#ia-skill">#</a></h2>
+  <p>Un <b>skill</b> es una carpeta con instrucciones (y opcionalmente scripts o plantillas) para un tipo de tarea. Su gracia: el agente solo ve la <b>descripción</b> corta de cada skill y carga el resto <b>cuando la tarea lo necesita</b>. Así puedes tener veinte recetas sin llenar el contexto.</p>
+  <table>
+    <tr><th>Pieza</th><th>Cuándo se carga</th><th>Para qué</th></tr>
+    <tr><td>Prompt</td><td>Lo escribes en el momento</td><td>La tarea de ahora</td></tr>
+    <tr><td><code>CLAUDE.md</code> / <code>GEMINI.md</code></td><td><b>Siempre</b>, al iniciar</td><td>Reglas del proyecto: comandos, estilo, estructura</td></tr>
+    <tr><td>Skill</td><td>Cuando la tarea coincide con su descripción, o con <code>/nombre</code></td><td>Recetas largas: "crear endpoint", "hacer release"</td></tr>
+    <tr><td>Comando <code>/</code></td><td>Cuando tú lo escribes</td><td>Un prompt guardado que repites mucho</td></tr>
+    <tr><td>Subagente</td><td>Cuando el agente delega</td><td>Trabajo aislado con su propio contexto</td></tr>
+    <tr><td>Hook</td><td>Automáticamente en un evento</td><td>Garantías: formatear tras editar, bloquear comandos</td></tr>
+  </table>
+  <h3>Un skill para flask-biblioteca (Claude Code)</h3>
+  <div class="bloque"><pre><code class="language-plaintext">.claude/skills/endpoint-flask/
+├── SKILL.md          ← obligatorio: frontmatter + instrucciones
+└── plantilla_test.py ← opcional: archivos de apoyo que el skill menciona</code></pre></div>
+  <div class="bloque"><pre><code class="language-markdown">---
+name: endpoint-flask
+description: Crea un recurso REST nuevo en flask-biblioteca siguiendo las 3 capas (modelo, migración, repositorio, servicio, ruta y test). Úsalo cuando pidan "agregar un recurso", "nuevo endpoint" o "CRUD" en la API Flask.
+---
+
+# Crear un recurso en flask-biblioteca
+
+1. Modelo en `app/models/&lt;recurso&gt;.py` e impórtalo en `app/models/__init__.py`
+   (si no, Alembic no lo ve).
+2. Migración: `flask --app wsgi db migrate -m "&lt;recurso&gt;"`. Revisa el archivo antes de `db upgrade`.
+3. Repositorio en `app/repositories/`: solo consultas, sin reglas.
+4. Servicio en `app/services/&lt;recurso&gt;_service.py`: reglas y transacción.
+   Lanza excepciones de `services/excepciones.py`; nunca devuelvas códigos HTTP.
+5. Blueprint en `app/routes/&lt;recurso&gt;.py`. Valida formato con `routes/validacion.py`
+   y regístralo en `create_app()`.
+6. Test en `tests/test_&lt;recurso&gt;.py` usando los fixtures de `conftest.py`
+   (copia la forma de `plantilla_test.py`).
+7. Corre `pytest -q`. No termines hasta que pase.
+
+## Reglas
+- Nombres en español, como el resto del proyecto.
+- Errores de negocio → excepción → `errors.py` los traduce (404/409/422).</code></pre></div>
+  <ul>
+    <li>En el proyecto: <code>.claude/skills/</code> (se comparte por git). Personales para todos tus proyectos: <code>~/.claude/skills/</code>.</li>
+    <li>La <b>descripción</b> es lo más importante: es lo que el agente lee para decidir si lo usa. Di qué hace y <i>cuándo</i> usarlo, con las palabras que tú usarías al pedirlo.</li>
+    <li>Lo invocas pidiendo la tarea ("agrega un recurso editoriales") o directamente con <code>/endpoint-flask editoriales</code>.</li>
+  </ul>
+  <h3>Lo mismo en Gemini CLI: un comando personalizado</h3>
+  <p>Gemini CLI guarda prompts reutilizables como archivos TOML en <code>.gemini/commands/</code> (proyecto) o <code>~/.gemini/commands/</code> (global). El nombre del archivo es el comando.</p>
+  <div class="bloque"><pre><code class="language-ini"># .gemini/commands/endpoint.toml   →   se usa como:  /endpoint editoriales
+description = "Crea un recurso REST en flask-biblioteca siguiendo las 3 capas"
+prompt = """
+Agrega el recurso {{args}} a flask-biblioteca:
+1. Modelo en app/models/ e impórtalo en app/models/__init__.py.
+2. Migración con flask --app wsgi db migrate.
+3. Repositorio (solo consultas), servicio (reglas, lanza excepciones), blueprint (valida formato).
+4. Test en tests/ con los fixtures de conftest.py. Corre pytest -q hasta que pase.
+"""</code></pre></div>
+</section>
+
+<section id="ia-agentes">
+  <h2>Agentes, subagentes y orquestador<a class="ancla" href="#ia-agentes">#</a></h2>
+  <p>Un <b>agente</b> es un modelo que trabaja en ciclo: decide qué hacer, usa una herramienta, mira el resultado y vuelve a decidir. Cuando le pides "arregla el test que falla", no responde de memoria: lee el test, lo corre, edita, lo vuelve a correr.</p>
+  <div class="diagrama">
+    <svg viewBox="0 0 760 240" role="img" aria-label="Ciclo del agente: tu prompt entra a Pensar, que elige una herramienta para Actuar, luego Observa el resultado y vuelve a Pensar. Cuando terminó, responde">
+      <rect class="caja" x="10" y="20" width="130" height="56" rx="10"/><text x="75" y="44" text-anchor="middle">Tu prompt</text><text class="sub" x="75" y="62" text-anchor="middle">"arregla el test"</text>
+      <rect class="nucleo" x="200" y="20" width="160" height="56" rx="10"/><text x="280" y="44" text-anchor="middle">Pensar</text><text class="sub" x="280" y="62" text-anchor="middle">¿qué hago ahora?</text>
+      <rect class="caja i" x="440" y="20" width="160" height="56" rx="10"/><text x="520" y="44" text-anchor="middle">Actuar</text><text class="sub" x="520" y="62" text-anchor="middle">leer · editar · pytest</text>
+      <rect class="caja i" x="320" y="150" width="160" height="56" rx="10"/><text x="400" y="174" text-anchor="middle">Observar</text><text class="sub" x="400" y="192" text-anchor="middle">salida del comando</text>
+      <rect class="caja f" x="590" y="150" width="160" height="56" rx="10"/><text x="670" y="174" text-anchor="middle">Responder</text><text class="sub" x="670" y="192" text-anchor="middle">"listo, 12 tests ok"</text>
+      <path class="flecha" d="M140 48H198"/><path class="flecha" d="M360 48H438"/>
+      <path class="flecha" d="M510 76L450 148"/><path class="flecha" d="M340 150L295 78"/>
+      <path class="flecha" d="M480 178H588"/>
+      <text class="sub" x="290" y="122" text-anchor="end">no terminé: repito</text>
+      <text class="sub" x="534" y="170" text-anchor="middle">terminé</text>
+    </svg>
+  </div>
+  <h3>Subagentes y orquestador</h3>
+  <p>Un <b>subagente</b> es otro agente al que el principal le encarga una parte. Trabaja con <b>su propio contexto</b> (no ve toda la conversación) y devuelve solo un resumen. Un <b>orquestador</b> es el agente que parte la tarea, reparte a los subagentes, junta lo que devuelven y decide el siguiente paso.</p>
+  <div class="diagrama">
+    <svg viewBox="0 0 760 260" role="img" aria-label="El usuario pide algo al orquestador; el orquestador reparte tareas a tres subagentes (explorador, implementador y revisor), recibe sus resúmenes y entrega el resultado">
+      <defs><marker id="punta-ia" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" style="fill:var(--texto-2)"/></marker></defs>
+      <rect class="caja" x="10" y="100" width="120" height="60" rx="10"/><text x="70" y="126" text-anchor="middle">Tú</text><text class="sub" x="70" y="145" text-anchor="middle">"agrega reservas"</text>
+      <rect class="nucleo" x="180" y="90" width="180" height="80" rx="12"/><text x="270" y="122" text-anchor="middle">Orquestador</text><text class="sub" x="270" y="142" text-anchor="middle">planifica · reparte · une</text>
+      <rect class="caja i" x="450" y="15" width="190" height="58" rx="10"/><text x="545" y="40" text-anchor="middle">Explorador</text><text class="sub" x="545" y="59" text-anchor="middle">¿dónde están los préstamos?</text>
+      <rect class="caja i" x="450" y="101" width="190" height="58" rx="10"/><text x="545" y="126" text-anchor="middle">Implementador</text><text class="sub" x="545" y="145" text-anchor="middle">escribe código + tests</text>
+      <rect class="caja i" x="450" y="187" width="190" height="58" rx="10"/><text x="545" y="212" text-anchor="middle">Revisor</text><text class="sub" x="545" y="231" text-anchor="middle">busca bugs y huecos</text>
+      <path class="flecha" d="M130 130H178"/>
+      <path class="linea" d="M360 115L448 50" marker-start="url(#punta-ia)" marker-end="url(#punta-ia)"/>
+      <path class="linea" d="M360 130H448" marker-start="url(#punta-ia)" marker-end="url(#punta-ia)"/>
+      <path class="linea" d="M360 145L448 210" marker-start="url(#punta-ia)" marker-end="url(#punta-ia)"/>
+      <text class="chico" x="660" y="100">tarea →</text><text class="chico" x="660" y="116">← resumen</text>
+      <text class="chico" x="660" y="146">cada uno con</text><text class="chico" x="660" y="162">su contexto</text>
+    </svg>
+  </div>
+  <table>
+    <tr><th>Patrón</th><th>Cómo funciona</th><th>Ejemplo</th></tr>
+    <tr><td>Cadena (pipeline)</td><td>La salida de un paso es la entrada del siguiente</td><td>Spec → plan → código → tests</td></tr>
+    <tr><td>Paralelo (fan-out)</td><td>Varios subagentes a la vez, se juntan los resultados</td><td>Revisar seguridad, rendimiento y estilo al mismo tiempo</td></tr>
+    <tr><td>Orquestador-trabajadores</td><td>Un agente decide sobre la marcha qué delegar</td><td>"Migra todos los servicios a la nueva API"</td></tr>
+    <tr><td>Evaluador-optimizador</td><td>Uno produce, otro critica, se repite</td><td>Implementador + revisor hasta que no haya observaciones</td></tr>
+    <tr><td>Router</td><td>Clasifica la petición y la manda al especialista</td><td>¿Es frontend o backend? → subagente correspondiente</td></tr>
+  </table>
+  <h3>Crear un subagente en Claude Code</h3>
+  <p>Un archivo Markdown en <code>.claude/agents/</code> (o crea uno guiado con <code>/agents</code>):</p>
+  <div class="bloque"><pre><code class="language-markdown">---
+name: revisor
+description: Revisa los cambios recientes buscando bugs, tests faltantes y violaciones de capas. Úsalo después de implementar algo en flask-biblioteca o angular-buscador.
+tools: Read, Grep, Glob, Bash
+model: sonnet
+---
+Eres un revisor de código exigente. Revisa `git diff` y responde con una lista:
+
+1. Bugs reales (con archivo:línea y cómo reproducirlo).
+2. Reglas de negocio sin test.
+3. Violaciones de capas: rutas con lógica de negocio, servicios que devuelven
+   códigos HTTP, repositorios con reglas.
+
+No edites archivos. Si no encuentras nada, dilo; no inventes problemas.</code></pre></div>
+  <div class="nota"><strong>¿Cuándo vale la pena un subagente?</strong>Cuando la tarea genera mucho "ruido" (buscar en cientos de archivos, leer logs largos) que no quieres en la conversación principal, o cuando quieres una mirada independiente (un revisor que no vio cómo se escribió el código). Para tareas chicas, un solo agente es más rápido y barato.</div>
+</section>
+
+<section id="ia-mcp">
+  <h2>MCP: conectar la IA con tus herramientas<a class="ancla" href="#ia-mcp">#</a></h2>
+  <p><b>MCP</b> (Model Context Protocol) es un estándar abierto para enchufar herramientas externas a cualquier agente: tu base de datos, GitHub, un navegador, la documentación de Angular. Un <b>servidor MCP</b> expone herramientas; el agente (el <b>host</b>) las descubre y las usa. Es como USB: el mismo servidor sirve en Claude Code, Gemini CLI, Cursor o VS Code.</p>
+  <div class="diagrama">
+    <svg viewBox="0 0 760 240" role="img" aria-label="El host (Claude Code o Gemini CLI) se conecta por el protocolo MCP a varios servidores: Playwright, documentación y base de datos; cada servidor habla con su servicio real">
+      <rect class="zona" x="10" y="20" width="200" height="200" rx="14"/>
+      <text x="110" y="50" text-anchor="middle">Host</text><text class="sub" x="110" y="68" text-anchor="middle">Claude Code / Gemini CLI</text>
+      <rect class="nucleo" x="40" y="95" width="140" height="44" rx="8"/><text x="110" y="122" text-anchor="middle">Modelo</text>
+      <text class="sub" x="110" y="175" text-anchor="middle">un cliente MCP</text><text class="sub" x="110" y="192" text-anchor="middle">por servidor</text>
+      <text class="chico" x="250" y="14">protocolo MCP (stdio o HTTP)</text>
+      <rect class="caja i" x="290" y="30" width="190" height="52" rx="10"/><text x="385" y="52" text-anchor="middle">Servidor Playwright</text><text class="sub" x="385" y="70" text-anchor="middle">abrir, clicar, capturar</text>
+      <rect class="caja i" x="290" y="100" width="190" height="52" rx="10"/><text x="385" y="122" text-anchor="middle">Servidor de docs</text><text class="sub" x="385" y="140" text-anchor="middle">docs actualizadas</text>
+      <rect class="caja i" x="290" y="170" width="190" height="52" rx="10"/><text x="385" y="192" text-anchor="middle">Servidor Postgres</text><text class="sub" x="385" y="210" text-anchor="middle">consultar tablas</text>
+      <rect class="caja" x="560" y="30" width="180" height="52" rx="10"/><text x="650" y="61" text-anchor="middle">Navegador</text>
+      <rect class="caja" x="560" y="100" width="180" height="52" rx="10"/><text x="650" y="131" text-anchor="middle">Docs Angular / Flask</text>
+      <rect class="caja" x="560" y="170" width="180" height="52" rx="10"/><text x="650" y="201" text-anchor="middle">Tu base de datos</text>
+      <path class="flecha" d="M210 80L288 56"/><path class="flecha" d="M210 126H288"/><path class="flecha" d="M210 172L288 196"/>
+      <path class="flecha" d="M480 56H558"/><path class="flecha" d="M480 126H558"/><path class="flecha" d="M480 196H558"/>
+    </svg>
+  </div>
+  <div class="bloque"><pre><code class="language-bash"># Claude Code: agregar servidores MCP
+claude mcp add playwright -- npx @playwright/mcp@latest                # local (stdio)
+claude mcp add --transport http context7 https://mcp.context7.com/mcp  # remoto (HTTP): docs de librerías
+claude mcp add playwright --scope project -- npx @playwright/mcp@latest # se guarda en .mcp.json (se comparte por git)
+claude mcp list                                                         # ver los configurados
+# dentro de Claude Code: /mcp  → estado, autenticación</code></pre></div>
+  <p>En Gemini CLI los servidores van en <code>mcpServers</code>:</p>
+  <figure class="codigo"><figcaption>.gemini/settings.json</figcaption><pre><code class="language-json">{
+  "mcpServers": {
+    "playwright": { "command": "npx", "args": ["@playwright/mcp@latest"] },
+    "context7": { "httpUrl": "https://mcp.context7.com/mcp" }
+  }
+}</code></pre></figure>
+  <div class="ojo"><strong>Un servidor MCP es código que corre en tu máquina</strong>Instala solo servidores de fuentes confiables, y no le des a uno de base de datos credenciales de producción con permiso de escritura.</div>
+</section>
+
+<section id="ia-dd">
+  <h2>La familia "*-Driven Development"<a class="ancla" href="#ia-dd">#</a></h2>
+  <p>Todas dicen "deja que <b>X</b> guíe cómo desarrollas". No compiten: cada una responde una pregunta distinta y se combinan.</p>
+  <table>
+    <tr><th>Sigla</th><th>Qué guía el desarrollo</th><th>Pregunta que responde</th><th>Artefacto</th></tr>
+    <tr><td><b>TDD</b> · Test-Driven</td><td>Un test que falla</td><td>¿El código hace lo que digo?</td><td>Tests unitarios</td></tr>
+    <tr><td><b>BDD</b> · Behavior-Driven</td><td>Escenarios de comportamiento</td><td>¿Hace lo que el negocio espera?</td><td><code>Dado / Cuando / Entonces</code></td></tr>
+    <tr><td><b>DDD</b> · Domain-Driven Design</td><td>El modelo del negocio</td><td>¿El código habla el idioma del negocio?</td><td>Glosario, contextos, agregados</td></tr>
+    <tr><td><b>SDD</b> · Spec-Driven</td><td>Una especificación escrita</td><td>¿Qué vamos a construir exactamente?</td><td><code>requirements.md</code>, <code>design.md</code>, <code>tasks.md</code></td></tr>
+    <tr><td><b>ODD</b> · Observability-Driven</td><td>Lo que vas a medir en producción</td><td>¿Cómo sabré que funciona de verdad?</td><td>Logs, métricas, trazas, alertas</td></tr>
+  </table>
+  <div class="idea"><strong>Cómo encajan con IA</strong><b>DDD</b> para nombrar las cosas → <b>SDD</b> para decirle a la IA qué construir → <b>TDD</b> para que la IA sepa cuándo terminó → <b>ODD</b> para saber si funciona en producción.</div>
+</section>
+
+<section id="ia-sdd">
+  <h2>SDD: Spec-Driven Development<a class="ancla" href="#ia-sdd">#</a></h2>
+  <p><b>En una frase:</b> antes de pedirle código a la IA, escribes (con su ayuda) una <b>especificación</b>: qué problema resuelves, qué requisitos debe cumplir, cómo se diseña y en qué tareas se parte. La spec es la fuente de verdad; el código se genera y se verifica contra ella.</p>
+  <p><b>Por qué importa con IA:</b> el "vibe coding" (pedir y aceptar lo que salga) funciona para prototipos, pero en un proyecto real la IA rellena los huecos con suposiciones. Una spec cierra esos huecos y se puede revisar en 5 minutos, antes de que existan 500 líneas.</p>
+  <div class="diagrama">
+    <svg viewBox="0 0 760 180" role="img" aria-label="Flujo SDD: idea, requisitos, diseño, tareas, implementar y verificar; si algo no cuadra se corrige la spec">
+      <rect class="caja" x="10" y="30" width="105" height="70" rx="10"/><text x="62" y="60" text-anchor="middle">Idea</text><text class="sub" x="62" y="80" text-anchor="middle">el problema</text>
+      <rect class="caja i" x="135" y="30" width="105" height="70" rx="10"/><text x="187" y="60" text-anchor="middle">Requisitos</text><text class="sub" x="187" y="80" text-anchor="middle">qué · EARS</text>
+      <rect class="caja i" x="260" y="30" width="105" height="70" rx="10"/><text x="312" y="60" text-anchor="middle">Diseño</text><text class="sub" x="312" y="80" text-anchor="middle">cómo</text>
+      <rect class="caja i" x="385" y="30" width="105" height="70" rx="10"/><text x="437" y="60" text-anchor="middle">Tareas</text><text class="sub" x="437" y="80" text-anchor="middle">pasos chicos</text>
+      <rect class="caja" x="510" y="30" width="105" height="70" rx="10"/><text x="562" y="60" text-anchor="middle">Implementar</text><text class="sub" x="562" y="80" text-anchor="middle">IA, tarea x tarea</text>
+      <rect class="caja f" x="635" y="30" width="115" height="70" rx="10"/><text x="692" y="60" text-anchor="middle">Verificar</text><text class="sub" x="692" y="80" text-anchor="middle">tests vs. spec</text>
+      <path class="flecha" d="M115 65H133"/><path class="flecha" d="M240 65H258"/><path class="flecha" d="M365 65H383"/><path class="flecha" d="M490 65H508"/><path class="flecha" d="M615 65H633"/>
+      <path class="flecha punteada" d="M692 100C692 160 187 160 187 102"/>
+      <text class="sub" x="440" y="170" text-anchor="middle">si algo no cuadra, se corrige la spec (no solo el código)</text>
+      <text class="chico" x="312" y="20" text-anchor="middle">tú revisas y apruebas cada documento</text>
+    </svg>
+  </div>
+  <p>Una spec mínima, para una funcionalidad nueva de flask-biblioteca:</p>
+  <div class="bloque"><pre><code class="language-markdown"># specs/reservas.md
+
+## Problema
+Un socio no puede apartar un libro que está prestado; tiene que volver a preguntar.
+
+## Requisitos (formato EARS: CUANDO … EL SISTEMA DEBE …)
+- R1. CUANDO un socio reserva un libro prestado, EL SISTEMA DEBE ponerlo al final de la cola de ese libro.
+- R2. SI el socio ya tiene 3 reservas activas, EL SISTEMA DEBE rechazar la reserva con 409.
+- R3. CUANDO se devuelve un libro con cola, EL SISTEMA DEBE prestárselo al primero de la cola.
+- R4. SI el libro está disponible, EL SISTEMA DEBE rechazar la reserva con 422 ("préstalo directamente").
+
+## Fuera de alcance
+- Notificaciones por email. Multas.
+
+## Diseño
+- Tabla `reservas(id, libro_id, socio_id, creada_en, estado)`; estado: activa | atendida | cancelada.
+- POST /reservas · DELETE /reservas/{id} · GET /socios/{id}/reservas
+- R3 vive en `prestamos_service.devolver()`, dentro de la misma transacción.
+
+## Tareas
+- [ ] T1. Modelo + migración
+- [ ] T2. `reservas_service.reservar()` con R1, R2, R4 + tests
+- [ ] T3. Atender la cola al devolver (R3) + tests
+- [ ] T4. Rutas + tests de API
+
+## Criterios de aceptación
+- `pytest -q` en verde. Cada requisito tiene al menos un test con su id en el nombre (`test_r2_...`).</code></pre></div>
+  <div class="bloque"><pre><code class="language-markdown">Lee @specs/reservas.md. Implementa SOLO la tarea T2.
+Cada test debe llevar el id del requisito en el nombre. Corre pytest -q.
+Si encuentras un caso que la spec no cubre, para y pregúntame; no lo decidas tú.</code></pre></div>
+  <table>
+    <tr><th>Herramienta</th><th>Cómo aplica SDD</th></tr>
+    <tr><td>Manual (cualquier agente)</td><td>Una carpeta <code>specs/</code> con Markdown como el de arriba. Funciona con Claude, Gemini o Codex.</td></tr>
+    <tr><td>GitHub Spec Kit</td><td>CLI <code>specify</code> que agrega comandos al agente para escribir la spec, el plan y las tareas, y luego implementar.</td></tr>
+    <tr><td>Kiro (AWS)</td><td>Editor que genera <code>requirements.md</code>, <code>design.md</code> y <code>tasks.md</code> por funcionalidad.</td></tr>
+  </table>
+</section>
+
+<section id="ia-ddd">
+  <h2>DDD: Domain-Driven Design<a class="ancla" href="#ia-ddd">#</a></h2>
+  <p><b>En una frase:</b> el código debe <b>modelar el negocio</b> y usar <b>sus palabras</b>. Lo propuso Eric Evans (2003). Tiene dos mitades: la <b>estratégica</b> (cómo partir un sistema grande en contextos) y la <b>táctica</b> (los bloques para escribir el código: entidades, objetos de valor, agregados…).</p>
+  <h3>Estratégico: contextos delimitados</h3>
+  <p>Una misma palabra significa cosas distintas en distintas partes del negocio. Para el catálogo, un "libro" es título, autor e ISBN. Para préstamos, es un ejemplar físico que está o no en el estante. En vez de un <code>Libro</code> gigante que sirve para todo, cada <b>contexto delimitado</b> tiene su propio modelo.</p>
+  <div class="diagrama">
+    <svg viewBox="0 0 760 260" role="img" aria-label="Tres contextos delimitados: catálogo, préstamos y socios, cada uno con su propio modelo; préstamos solo guarda los ids de libro y socio y se comunica por API o eventos">
+      <rect class="zona" x="10" y="20" width="230" height="180" rx="14"/>
+      <rect class="zona" x="265" y="20" width="230" height="180" rx="14"/>
+      <rect class="zona" x="520" y="20" width="230" height="180" rx="14"/>
+      <text x="125" y="48" text-anchor="middle">Catálogo</text><text x="380" y="48" text-anchor="middle">Préstamos</text><text x="635" y="48" text-anchor="middle">Socios</text>
+      <rect class="caja h" x="30" y="66" width="190" height="52" rx="8"/><text x="125" y="88" text-anchor="middle">Libro</text><text class="sub" x="125" y="106" text-anchor="middle">título, autor, ISBN</text>
+      <rect class="caja h" x="30" y="132" width="190" height="52" rx="8"/><text x="125" y="154" text-anchor="middle">Autor</text><text class="sub" x="125" y="172" text-anchor="middle">nombre, país</text>
+      <rect class="nucleo" x="285" y="66" width="190" height="52" rx="8"/><text x="380" y="88" text-anchor="middle">Prestamo (agregado)</text><text class="sub" x="380" y="106" text-anchor="middle">libro_id, socio_id, vence</text>
+      <rect class="caja h" x="285" y="132" width="190" height="52" rx="8"/><text x="380" y="154" text-anchor="middle">Ejemplar</text><text class="sub" x="380" y="172" text-anchor="middle">disponible: sí / no</text>
+      <rect class="caja h" x="540" y="66" width="190" height="52" rx="8"/><text x="635" y="88" text-anchor="middle">Socio</text><text class="sub" x="635" y="106" text-anchor="middle">nombre, email</text>
+      <rect class="caja h" x="540" y="132" width="190" height="52" rx="8"/><text x="635" y="154" text-anchor="middle">Membresía</text><text class="sub" x="635" y="172" text-anchor="middle">activa, máx. préstamos</text>
+      <path class="flecha" d="M265 110H242"/><path class="flecha" d="M495 110H518"/>
+      <text class="sub" x="380" y="228" text-anchor="middle">Préstamos solo guarda los ids de libro y socio; consulta a los otros contextos</text>
+      <text class="sub" x="380" y="246" text-anchor="middle">por su API o reacciona a sus eventos. Cada contexto = un módulo del monolito modular.</text>
+    </svg>
+  </div>
+  <h3>Táctico: los bloques</h3>
+  <table>
+    <tr><th>Bloque</th><th>Qué es</th><th>En la biblioteca</th></tr>
+    <tr><td>Lenguaje ubicuo</td><td>Las mismas palabras en las reuniones y en el código</td><td><code>prestar()</code>, <code>devolver()</code>, <code>Socio</code> (no <code>User</code>, no <code>checkout()</code>)</td></tr>
+    <tr><td>Entidad</td><td>Tiene identidad que dura en el tiempo</td><td><code>Socio</code> con id 7, aunque cambie de email</td></tr>
+    <tr><td>Objeto de valor</td><td>Se define por su valor, inmutable, se valida al crearse</td><td><code>Isbn("978-…")</code>, <code>Periodo(desde, hasta)</code></td></tr>
+    <tr><td>Agregado</td><td>Grupo de objetos que se guarda junto y protege sus reglas</td><td><code>Prestamo</code>: nadie cambia su fecha de vencimiento por fuera</td></tr>
+    <tr><td>Evento de dominio</td><td>Algo que pasó y a otros les importa</td><td><code>LibroDevuelto</code> → atender la cola de reservas</td></tr>
+    <tr><td>Repositorio</td><td>Guarda y recupera agregados enteros</td><td><code>RepositorioPrestamos.obtener(id)</code></td></tr>
+    <tr><td>Servicio de dominio</td><td>Regla que no pertenece a una sola entidad</td><td>Calcular la multa según membresía y días de atraso</td></tr>
+  </table>
+  <div class="bloque"><pre><code class="language-python">from dataclasses import dataclass
+from datetime import date
+
+
+@dataclass(frozen=True)                      # objeto de valor: inmutable y se valida al nacer
+class Isbn:
+    valor: str
+
+    def __post_init__(self):
+        digitos = self.valor.replace("-", "")
+        if len(digitos) not in (10, 13) or not digitos[:-1].isdigit():
+            raise ValueError(f"ISBN inválido: {self.valor}")
+
+
+@dataclass(frozen=True)                      # evento de dominio: un hecho en pasado
+class LibroDevuelto:
+    libro_id: int
+    fecha: date</code></pre></div>
+  <div class="idea"><strong>DDD + IA</strong>Pon el <b>glosario del dominio</b> en <code>CLAUDE.md</code> / <code>GEMINI.md</code> ("Socio, no Usuario; Préstamo vence a los 14 días; un Socio tiene máximo 3 préstamos"). El agente usará tus palabras y tus reglas en vez de inventar las suyas, y los nombres coherentes hacen que el código sea más fácil de leer para ti y para la IA.</div>
+</section>
+
+<section id="ia-odd">
+  <h2>ODD: Observability-Driven Development<a class="ancla" href="#ia-odd">#</a></h2>
+  <p><b>En una frase:</b> antes de escribir una funcionalidad decides <b>cómo vas a saber, en producción, que funciona</b>, e instrumentas el código para eso desde el principio. Los tests te dicen que funciona en tu máquina; la observabilidad te dice qué pasa con usuarios reales.</p>
+  <div class="nota"><strong>Ojo con la sigla</strong>"ODD" también se usa para <b>Outcome-Driven Development</b>: guiar el trabajo por resultados medibles de negocio ("reducir a la mitad los libros que vuelven tarde") en vez de por lista de funcionalidades. Las dos ideas se complementan: el <i>outcome</i> dice qué medir; la <i>observabilidad</i> lo mide.</div>
+  <div class="diagrama">
+    <svg viewBox="0 0 760 170" role="img" aria-label="Ciclo ODD: definir la señal, instrumentar el código, desplegar, observar en producción y aprender, que vuelve a definir la señal">
+      <rect class="caja i" x="10" y="40" width="130" height="66" rx="10"/><text x="75" y="68" text-anchor="middle">Definir señal</text><text class="sub" x="75" y="88" text-anchor="middle">"% préstamos ok"</text>
+      <rect class="caja i" x="165" y="40" width="130" height="66" rx="10"/><text x="230" y="68" text-anchor="middle">Instrumentar</text><text class="sub" x="230" y="88" text-anchor="middle">logs · métricas</text>
+      <rect class="caja" x="320" y="40" width="130" height="66" rx="10"/><text x="385" y="68" text-anchor="middle">Desplegar</text><text class="sub" x="385" y="88" text-anchor="middle">producción</text>
+      <rect class="caja f" x="475" y="40" width="130" height="66" rx="10"/><text x="540" y="68" text-anchor="middle">Observar</text><text class="sub" x="540" y="88" text-anchor="middle">dashboard, alertas</text>
+      <rect class="caja" x="630" y="40" width="120" height="66" rx="10"/><text x="690" y="68" text-anchor="middle">Aprender</text><text class="sub" x="690" y="88" text-anchor="middle">qué cambiar</text>
+      <path class="flecha" d="M140 73H163"/><path class="flecha" d="M295 73H318"/><path class="flecha" d="M450 73H473"/><path class="flecha" d="M605 73H628"/>
+      <path class="flecha punteada" d="M690 106C690 160 75 160 75 108"/>
+    </svg>
+  </div>
+  <table>
+    <tr><th>Pilar</th><th>Qué es</th><th>Ejemplo</th></tr>
+    <tr><td>Logs</td><td>Registro de eventos, mejor en JSON (estructurado)</td><td><code>{"evento":"prestamo_rechazado","motivo":"ya_prestado","libro_id":3}</code></td></tr>
+    <tr><td>Métricas</td><td>Números en el tiempo</td><td>Peticiones por minuto, % de errores 5xx, latencia p95</td></tr>
+    <tr><td>Trazas</td><td>El recorrido de una petición por todos los servicios</td><td>Angular → gateway → préstamos → Postgres, con tiempos de cada tramo</td></tr>
+  </table>
+  <p>En flask-biblioteca, un primer paso: un log estructurado por petición, reutilizando el <code>X-Request-Id</code> de <a href="#fl-headers">Headers en Flask</a>.</p>
+  <div class="bloque"><pre><code class="language-python"># app/__init__.py, dentro de create_app() (después de before_request)
+import json
+import logging
+
+log = logging.getLogger("biblioteca")
+
+@app.after_request
+def registrar(respuesta):
+    log.info(json.dumps({
+        "request_id": g.request_id,
+        "metodo": request.method,
+        "ruta": request.path,
+        "estado": respuesta.status_code,
+        "ms": round((time.perf_counter() - g.inicio) * 1000, 1),
+    }))
+    return respuesta</code></pre></div>
+  <p>Con el request id, cuando un usuario reporta "falló mi préstamo", buscas ese id en los logs y ves exactamente qué pasó. El estándar para métricas y trazas es <b>OpenTelemetry</b>, que funciona con Flask y Angular.</p>
+  <div class="idea"><strong>ODD en apps con IA</strong>Si tu app usa un LLM, la observabilidad incluye guardar <b>trazas de cada llamada</b> (prompt, respuesta, tokens, tiempo) y correr <b>evals</b>: un conjunto de casos de prueba con respuestas esperadas que corres cada vez que cambias el prompt o el modelo. Son los "tests" de la parte que no es determinista.</div>
+</section>
+
+<section id="ia-claude">
+  <h2>Configurar Claude Code en la terminal<a class="ancla" href="#ia-claude">#</a></h2>
+  <ol class="pasos">
+    <li><b>Instalar</b> (Linux / macOS / WSL):
+      <div class="bloque"><pre><code class="language-bash">curl -fsSL https://claude.ai/install.sh | bash     # instalador nativo
+# o con npm (Node 18+):
+npm install -g @anthropic-ai/claude-code
+claude --version</code></pre></div></li>
+    <li><b>Entrar:</b> en la carpeta de tu proyecto ejecuta <code>claude</code>. La primera vez abre el navegador para iniciar sesión con tu cuenta de Claude (o usa una API key de la Consola de Anthropic).</li>
+    <li><b>Crear la memoria del proyecto:</b> dentro de Claude, escribe <code>/init</code>. Analiza el repo y genera un <code>CLAUDE.md</code>. Revísalo y déjalo corto.</li>
+    <li><b>Configurar permisos</b> en <code>.claude/settings.json</code> para no aprobar lo mismo cada vez (y prohibir lo peligroso).</li>
+    <li><b>Agregar skills, subagentes y MCP</b> a medida que repitas tareas.</li>
+  </ol>
+  <h3>Dónde va cada cosa</h3>
+  <div class="bloque"><pre><code class="language-plaintext">mi-proyecto/
+├── CLAUDE.md                     ← memoria del proyecto: se carga SIEMPRE (va a git)
+├── .mcp.json                     ← servidores MCP del proyecto (va a git)
+└── .claude/
+    ├── settings.json             ← permisos y hooks del equipo (va a git)
+    ├── settings.local.json       ← tus ajustes personales (NO va a git)
+    ├── skills/endpoint-flask/SKILL.md
+    ├── agents/revisor.md
+    └── commands/revisar.md       ← comando /revisar (prompt guardado)
+
+~/.claude/
+├── CLAUDE.md                     ← tus preferencias para TODOS los proyectos
+├── settings.json
+├── skills/  agents/              ← personales, disponibles en todos lados</code></pre></div>
+  <h3>Un buen CLAUDE.md</h3>
+  <div class="bloque"><pre><code class="language-markdown"># flask-biblioteca
+
+API REST de biblioteca. Flask 3 + SQLAlchemy 2 + PostgreSQL, en 3 capas.
+
+## Comandos
+- Tests: `pytest -q`
+- Servidor: `flask --app wsgi run --debug`
+- Migración: `flask --app wsgi db migrate -m "msg"` y luego `db upgrade`
+
+## Arquitectura
+- routes/ → solo HTTP y formato. services/ → reglas y transacciones. repositories/ → solo consultas.
+- Los servicios lanzan excepciones de services/excepciones.py; errors.py las traduce a HTTP.
+
+## Glosario (usar estas palabras)
+- Socio (no "usuario"). Préstamo vence a los 14 días. Máximo 3 préstamos por socio.
+
+## Reglas
+- Código y nombres en español. Todo cambio de regla de negocio lleva test.
+- No edites migraciones ya aplicadas; crea una nueva.
+
+@docs/convenciones.md</code></pre></div>
+  <p>La última línea <b>importa</b> otro archivo: <code>@ruta</code> dentro de <code>CLAUDE.md</code> incluye su contenido.</p>
+  <div class="nota"><strong>Menos es más</strong>El <code>CLAUDE.md</code> se lee en cada conversación. Pon solo lo que el agente no puede deducir del código y que necesita casi siempre. Las recetas largas van en skills.</div>
+  <h3>Permisos y hooks</h3>
+  <figure class="codigo"><figcaption>.claude/settings.json</figcaption><pre><code class="language-json">{
+  "permissions": {
+    "allow": ["Bash(pytest:*)", "Bash(npm run test:*)", "Bash(ng test:*)", "Bash(git diff:*)", "Bash(git status)"],
+    "deny": ["Read(./.env)", "Read(./.env.*)", "Bash(git push:*)", "Bash(rm -rf:*)"]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{ "type": "command", "command": "jq -r '.tool_input.file_path' | xargs npx prettier --write --ignore-unknown" }]
+      }
+    ]
+  }
+}</code></pre></figure>
+  <p>El hook recibe por la entrada estándar un JSON con lo que hizo la herramienta; aquí formatea cada archivo que Claude edita. A diferencia de una instrucción en <code>CLAUDE.md</code>, un hook <b>siempre</b> se ejecuta.</p>
+  <h3>Comandos y atajos del día a día</h3>
+  <table>
+    <tr><th>Comando</th><th>Qué hace</th></tr>
+    <tr><td><code>/init</code></td><td>Genera <code>CLAUDE.md</code> a partir del proyecto</td></tr>
+    <tr><td><code>/clear</code></td><td>Empieza de cero (nueva tarea, contexto limpio)</td></tr>
+    <tr><td><code>/compact</code></td><td>Resume la conversación para liberar contexto sin perder el hilo</td></tr>
+    <tr><td><code>/model</code></td><td>Cambiar de modelo</td></tr>
+    <tr><td><code>/agents</code> · <code>/mcp</code> · <code>/hooks</code> · <code>/permissions</code></td><td>Administrar subagentes, servidores MCP, hooks y permisos</td></tr>
+    <tr><td><code>/memory</code></td><td>Editar los <code>CLAUDE.md</code></td></tr>
+    <tr><td><kbd>Shift</kbd>+<kbd>Tab</kbd></td><td>Cambiar de modo: normal → aceptar ediciones → <b>plan</b> (solo investiga y propone)</td></tr>
+    <tr><td><kbd>Esc</kbd> · <kbd>Esc</kbd> <kbd>Esc</kbd></td><td>Interrumpir · volver a un punto anterior de la conversación</td></tr>
+    <tr><td><code>@archivo</code> · <code>!comando</code></td><td>Mencionar un archivo · correr un comando de shell directo</td></tr>
+    <tr><td><code>claude -c</code> · <code>claude -r</code></td><td>Continuar la última conversación · elegir una anterior</td></tr>
+    <tr><td><code>claude -p "…"</code></td><td>Sin interfaz: responde y sale (para scripts y CI)</td></tr>
+  </table>
+</section>
+
+<section id="ia-gemini">
+  <h2>Configurar Gemini CLI en la terminal<a class="ancla" href="#ia-gemini">#</a></h2>
+  <ol class="pasos">
+    <li><b>Instalar</b> (Node 20+):
+      <div class="bloque"><pre><code class="language-bash">npm install -g @google/gemini-cli
+gemini --version
+# o sin instalar: npx @google/gemini-cli</code></pre></div></li>
+    <li><b>Entrar:</b> ejecuta <code>gemini</code> en tu proyecto y elige <i>Login with Google</i>. Alternativa: una API key de Google AI Studio en <code>export GEMINI_API_KEY="…"</code>.</li>
+    <li><b>Memoria del proyecto:</b> crea un <code>GEMINI.md</code> en la raíz (mismo contenido que el <code>CLAUDE.md</code> de arriba). Gemini lee también los <code>GEMINI.md</code> de subcarpetas y el global en <code>~/.gemini/GEMINI.md</code>.</li>
+    <li><b>Configuración</b> en <code>.gemini/settings.json</code> (proyecto) o <code>~/.gemini/settings.json</code> (global): servidores MCP, tema, modelo.</li>
+    <li><b>Comandos propios</b> en <code>.gemini/commands/*.toml</code> (ver <a href="#ia-skill">Skill y comandos</a>).</li>
+  </ol>
+  <div class="bloque"><pre><code class="language-plaintext">mi-proyecto/
+├── GEMINI.md                   ← memoria del proyecto
+└── .gemini/
+    ├── settings.json           ← mcpServers, preferencias
+    └── commands/
+        └── endpoint.toml       ← /endpoint
+
+~/.gemini/
+├── GEMINI.md                   ← preferencias globales
+├── settings.json
+└── commands/</code></pre></div>
+  <table>
+    <tr><th>Comando</th><th>Qué hace</th></tr>
+    <tr><td><code>/help</code></td><td>Lista de comandos</td></tr>
+    <tr><td><code>/memory show</code> · <code>/memory refresh</code></td><td>Ver o recargar el contexto de los <code>GEMINI.md</code></td></tr>
+    <tr><td><code>/tools</code> · <code>/mcp</code></td><td>Herramientas disponibles · estado de los servidores MCP</td></tr>
+    <tr><td><code>/chat save nombre</code> · <code>/chat resume nombre</code></td><td>Guardar y retomar una conversación</td></tr>
+    <tr><td><code>/compress</code></td><td>Resumir el contexto (como <code>/compact</code>)</td></tr>
+    <tr><td><code>/stats</code></td><td>Tokens usados en la sesión</td></tr>
+    <tr><td><code>@archivo</code> · <code>!comando</code></td><td>Incluir un archivo · correr shell</td></tr>
+    <tr><td><code>gemini -p "…"</code></td><td>Sin interfaz, para scripts</td></tr>
+  </table>
+</section>
+
+<section id="ia-comparar">
+  <h2>Claude Code, Gemini CLI y Codex: lo mismo con otros nombres<a class="ancla" href="#ia-comparar">#</a></h2>
+  <table>
+    <tr><th></th><th>Claude Code</th><th>Gemini CLI</th><th>Codex CLI (OpenAI)</th></tr>
+    <tr><td>Instalar</td><td><code>npm i -g @anthropic-ai/claude-code</code></td><td><code>npm i -g @google/gemini-cli</code></td><td><code>npm i -g @openai/codex</code></td></tr>
+    <tr><td>Ejecutar</td><td><code>claude</code></td><td><code>gemini</code></td><td><code>codex</code></td></tr>
+    <tr><td>Memoria del proyecto</td><td><code>CLAUDE.md</code></td><td><code>GEMINI.md</code></td><td><code>AGENTS.md</code></td></tr>
+    <tr><td>Configuración</td><td><code>.claude/settings.json</code></td><td><code>.gemini/settings.json</code></td><td><code>~/.codex/config.toml</code></td></tr>
+    <tr><td>Prompts guardados</td><td>Skills y <code>.claude/commands/*.md</code></td><td><code>.gemini/commands/*.toml</code></td><td>Prompts personalizados</td></tr>
+    <tr><td>Subagentes</td><td><code>.claude/agents/*.md</code></td><td>—</td><td>—</td></tr>
+    <tr><td>MCP</td><td><code>claude mcp add</code> / <code>.mcp.json</code></td><td><code>mcpServers</code> en settings</td><td><code>[mcp_servers]</code> en config</td></tr>
+  </table>
+  <div class="idea"><strong>Un solo archivo de reglas para todos</strong><code>AGENTS.md</code> es un formato abierto que leen Codex, Cursor y otros. Escribe tus reglas ahí una vez y haz que los demás lo importen:
+    <p><code>CLAUDE.md</code> con una sola línea: <code>@AGENTS.md</code> (Claude Code importa archivos con <code>@</code>).</p>
+    <p>Para Gemini, un enlace: <code>ln -s AGENTS.md GEMINI.md</code>.</p>
+  </div>
+</section>
+
+<section id="ia-flujo">
+  <h2>Flujo de trabajo recomendado<a class="ancla" href="#ia-flujo">#</a></h2>
+  <div class="diagrama">
+    <svg viewBox="0 0 760 150" role="img" aria-label="Flujo: explorar, planear, implementar, verificar y confirmar">
+      <rect class="caja i" x="10" y="30" width="130" height="70" rx="10"/><text x="75" y="60" text-anchor="middle">1. Explorar</text><text class="sub" x="75" y="80" text-anchor="middle">"lee y explícame"</text>
+      <rect class="caja i" x="165" y="30" width="130" height="70" rx="10"/><text x="230" y="60" text-anchor="middle">2. Planear</text><text class="sub" x="230" y="80" text-anchor="middle">modo plan / spec</text>
+      <rect class="caja i" x="320" y="30" width="130" height="70" rx="10"/><text x="385" y="60" text-anchor="middle">3. Implementar</text><text class="sub" x="385" y="80" text-anchor="middle">tarea por tarea</text>
+      <rect class="caja f" x="475" y="30" width="130" height="70" rx="10"/><text x="540" y="60" text-anchor="middle">4. Verificar</text><text class="sub" x="540" y="80" text-anchor="middle">tests + revisor</text>
+      <rect class="caja" x="630" y="30" width="120" height="70" rx="10"/><text x="690" y="60" text-anchor="middle">5. Commit</text><text class="sub" x="690" y="80" text-anchor="middle">tú lees el diff</text>
+      <path class="flecha" d="M140 65H163"/><path class="flecha" d="M295 65H318"/><path class="flecha" d="M450 65H473"/><path class="flecha" d="M605 65H628"/>
+      <text class="sub" x="380" y="135" text-anchor="middle">el agente hace el trabajo; tú decides en 2 y en 5</text>
+    </svg>
+  </div>
+  <ol class="pasos">
+    <li><b>Explorar sin tocar:</b> "Lee <code>@app/services/prestamos_service.py</code> y explícame cómo se valida un préstamo. No edites nada."</li>
+    <li><b>Planear:</b> modo plan (<kbd>Shift</kbd>+<kbd>Tab</kbd>) o una spec. Corrige el plan antes de que escriba código.</li>
+    <li><b>Implementar en pasos chicos</b> con un criterio de terminado ("hasta que <code>pytest -q</code> pase").</li>
+    <li><b>Verificar:</b> tests, y para cambios grandes un subagente revisor con contexto limpio.</li>
+    <li><b>Commit:</b> lee el diff tú. Eres el responsable del código, lo haya escrito quien lo haya escrito.</li>
+  </ol>
+  <div class="ojo"><strong>Seguridad básica</strong>
+    <p>No pegues contraseñas ni <code>.env</code> en el chat, y bloquea su lectura en los permisos.</p>
+    <p>Lee los comandos antes de aprobarlos, sobre todo los que borran, hacen push o tocan producción.</p>
+    <p>Desconfía de instrucciones que aparezcan dentro de archivos, issues o páginas web que el agente lea: pueden ser <i>prompt injection</i>.</p>
+  </div>
+</section>
+
 <section id="glosario">
   <h2>Glosario<a class="ancla" href="#glosario">#</a></h2>
   <table>
@@ -1177,11 +2767,30 @@ this.biblioteca.prestar(1, 1).subscribe({
     <tr><td>Fixture</td><td>Preparación reutilizable para tests en pytest.</td></tr>
     <tr><td>Mock / doble de prueba</td><td>Reemplazo falso de algo real (HTTP, una función) durante un test.</td></tr>
     <tr><td>CORS</td><td>Regla del navegador: un sitio solo puede llamar a otra dirección si esta lo permite.</td></tr>
+    <tr><td>Header (cabecera)</td><td>Dato extra de una petición o respuesta HTTP, con forma <code>Nombre: valor</code> (<code>Authorization</code>, <code>Content-Type</code>).</td></tr>
+    <tr><td>Interceptor</td><td>Función por la que pasan todas las peticiones de HttpClient; pone tokens, maneja errores globales.</td></tr>
+    <tr><td>Guard</td><td>Función que el router de Angular ejecuta para permitir o impedir entrar o salir de una ruta.</td></tr>
+    <tr><td>UrlTree</td><td>Una ruta "armada" que un guard devuelve para redirigir.</td></tr>
+    <tr><td>Promesa</td><td>Un valor que llegará una sola vez en el futuro (<code>async/await</code>). No se cancela.</td></tr>
+    <tr><td>Preflight</td><td>Petición OPTIONS automática del navegador para preguntar al servidor si permite un header o método.</td></tr>
+    <tr><td>Monolito modular</td><td>Un solo deploy partido en módulos que solo se usan por su API pública.</td></tr>
+    <tr><td>Hexagonal</td><td>Arquitectura con el negocio al centro; se conecta al mundo por puertos (interfaces) y adaptadores.</td></tr>
+    <tr><td>Puerto / adaptador</td><td>Puerto: interfaz que el negocio necesita. Adaptador: implementación concreta (SQLAlchemy, email, memoria).</td></tr>
+    <tr><td>Microservicio</td><td>Parte de la app que se despliega sola, con su propia base de datos, y se comunica por red.</td></tr>
+    <tr><td>Contexto delimitado</td><td>(DDD) Parte del negocio con su propio modelo y vocabulario.</td></tr>
+    <tr><td>Agregado</td><td>(DDD) Grupo de objetos que se guarda junto y protege sus reglas.</td></tr>
+    <tr><td>Prompt</td><td>Mensaje con instrucciones que le das a un modelo de IA.</td></tr>
+    <tr><td>Skill</td><td>Carpeta con instrucciones para un tipo de tarea que el agente carga solo cuando la necesita.</td></tr>
+    <tr><td>Agente / subagente</td><td>Modelo que usa herramientas en ciclo hasta terminar / agente al que otro le delega una parte.</td></tr>
+    <tr><td>Orquestador</td><td>Agente que parte una tarea, la reparte a subagentes y junta los resultados.</td></tr>
+    <tr><td>MCP</td><td>Model Context Protocol: estándar para conectar herramientas externas a un agente de IA.</td></tr>
+    <tr><td>Spec</td><td>Especificación escrita (requisitos, diseño, tareas) que guía la implementación en SDD.</td></tr>
+    <tr><td>Hook</td><td>Script que el agente ejecuta automáticamente en un evento (por ejemplo, después de editar).</td></tr>
   </table>
 </section>
 
 <footer>
-  Guía de estudio basada en los proyectos <code>angular-buscador</code> y <code>flask-biblioteca</code>. El código de "Código completo" se genera directamente desde los proyectos.
+  Guía de estudio basada en los proyectos <code>angular-buscador</code> y <code>flask-biblioteca</code>, más arquitectura y desarrollo con IA. El código de "Código completo" se genera directamente desde los proyectos.
 </footer>
 
 </div>
